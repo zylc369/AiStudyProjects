@@ -49,5 +49,5 @@
 - [x] Add build instructions to README → README.md contains build and run commands
 - [x] Verify all test files in testFiles directory → No test artifacts outside testFiles directory
 - [x] Run complete test suite → All tests pass with 100% content and format coverage
-- [ ] Build final JAR artifact → JAR file exists in target directory with all dependencies
+- [x] Build final JAR artifact → JAR file exists in target directory with all dependencies
 - [ ] Print tool path to console → Output shows full path to built JAR file

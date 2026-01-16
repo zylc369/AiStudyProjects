@@ -1,43 +1,25 @@
-TASK: Run complete test suite → All tests pass with 100% content and format coverage
-
-ACTION: Verify all tests pass and add comprehensive content/format coverage tests for ALL Markdown elements specified in SPECIFICATION.md
-
-EXPECTED_OUTCOME: All tests pass, and coverage tests verify 100% of Markdown elements (H1-H6, paragraphs, bold, italic, bold-italic, links, inline code, code blocks, unordered lists, ordered lists, nested lists, tables) are correctly converted to equivalent Word formatting
+TASK: Build final JAR artifact → JAR file exists in target directory with all dependencies
+ACTION: Run Maven build command to create executable JAR with all dependencies packaged
+EXPECTED_OUTCOME: MarkDownToWord-1.0.jar exists in target directory and can be executed as a standalone application
 
 EXISTING_CODE:
-- MarkDownToWordSource/src/test/java/com/markdowntoword/IntegrationTest.java - Contains content and format verification tests
-- MarkDownToWordSource/src/test/java/com/markdowntoword/util/TextContentExtractor.java - Content extraction utilities
-- MarkDownToWordSource/src/test/java/com/markdowntoword/util/FormatVerifier.java - Format verification utilities
+- MarkDownToWordSource/pom.xml - Already configured with maven-shade-plugin for creating fat JAR with Main-Class manifest
 
 PATTERNS:
-- Use TextContentExtractor.extractFromMarkdown() and TextContentExtractor.extractFromWord() for content verification
-- Use FormatVerifier methods (countHeadingStyle, countBoldRuns, countItalicRuns, etc.) for format verification
-- Follow existing test pattern in IntegrationTest: create Markdown, convert, verify
+- Use `mvn clean package` for building (defined in CONTEXT.md)
+- Maven shade plugin will create executable JAR at MarkDownToWord-1.0.jar
 
 PLAN:
-1. Run existing test suite to confirm all 309 tests pass
-2. Analyze coverage gaps - check which Markdown elements from SPECIFICATION.md are NOT explicitly tested for format verification
-3. Add comprehensive format coverage test that verifies ALL Markdown elements in one test document
-4. Add 100% coverage verification test that explicitly checks each element type exists with correct formatting
-5. Re-run test suite to confirm all tests pass including new coverage tests
+1. Navigate to MarkDownToWordSource directory
+2. Run `mvn clean package` to build the project
+3. Verify MarkDownToWord-1.0.jar exists in target directory
+4. Verify JAR is executable (contains Main-Class manifest)
 
 FILES_TO_CREATE: []
-FILES_TO_MODIFY:
-- MarkDownToWordSource/src/test/java/com/markdowntoword/IntegrationTest.java (Add comprehensive coverage tests)
-
-TEST_COMMAND: cd MarkDownToWordSource && mvn test
+FILES_TO_MODIFY: []
+TEST_COMMAND: cd MarkDownToWordSource && mvn clean package
 
 OUTCOME_VERIFICATION:
-- `mvn test` shows "Tests run: XXX, Failures: 0, Errors: 0, Skipped: 0"
-- New test "testFormatVerification_CompleteCoverage_100Percent" verifies:
-  - H1 through H6 headings each exist with correct HeadingX style
-  - Bold formatting exists (countBoldRuns > 0)
-  - Italic formatting exists (countItalicRuns > 0)
-  - Bold+Italic formatting exists
-  - Hyperlinks exist (countHyperlinks >= 1)
-  - Inline code has monospace font (countMonospaceRuns > 0)
-  - Code blocks exist with monospace + shading (countCodeBlocks > 0)
-  - Unordered list formatting exists (countBulletListParagraphs > 0)
-  - Ordered list formatting exists (countOrderedListParagraphs > 0)
-  - Tables exist (countTables >= 1)
-- Content verification test passes (containsAllContent returns true for all test files)
+- ls -la MarkDownToWordSource/target/MarkDownToWord-1.0.jar shows file exists
+- java -jar MarkDownToWordSource/target/MarkDownToWord-1.0.jar runs without error (shows usage)
+- JAR file size should be > 5MB (contains all dependencies like POI and Flexmark)
