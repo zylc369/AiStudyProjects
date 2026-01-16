@@ -1,56 +1,58 @@
-TASK: Implement code block conversion → Markdown ```code``` converts to Word preformatted text block
+TASK: Implement ordered list conversion → Markdown 1. item converts to Word numbered list
 
-ACTION: Create a CodeBlockConverter class that converts Flexmark FencedCodeBlock AST nodes to Word paragraphs with monospace font, background shading, and proper spacing.
+ACTION: Create OrderedListConverter class that converts Flexmark OrderedList AST nodes to Word numbered paragraphs using Apache POI's XWPFNumbering with decimal number format (1, 2, 3, ...)
 
-EXPECTED_OUTCOME: Markdown fenced code blocks (```language\ncode\n```) convert to Word paragraphs with Courier New monospace font, gray background shading, and spacing before/after for visual separation.
+EXPECTED_OUTCOME: OrderedListConverter converts Markdown ordered lists (1., 2., 3., etc.) to Word numbered lists with proper numbering format
 
 EXISTING_CODE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/InlineCodeConverter.java - Pattern for monospace font, NodeVisitor usage, getTextFromNode method
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/WordDocumentBuilder.java - XWPFDocument access pattern
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/ParagraphConverter.java - Text extraction and visitor pattern
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/HeadingConverter.java - NodeVisitor pattern reference
-- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/InlineCodeConverterTest.java - Test patterns
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/UnorderedListConverter.java - Pattern for list conversion with XWPFNumbering
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/WordDocumentBuilder.java - Base document builder pattern
 
 PATTERNS:
-- Constructor takes XWPFDocument, throws IllegalArgumentException for null
-- addCodeBlock(String code) method creates paragraph with monospace font
-- convertFencedCodeBlock(FencedCodeBlock block) extracts content using getContentChars()
-- convertDocument() uses NodeVisitor with VisitHandler<FencedCodeBlock>
-- getTextFromNode() and appendTextFromNode() for recursive text extraction
-- Constant MONOSPACE_FONT_FAMILY = "Courier New"
-- Tests use @TempDir, @AfterEach cleanup, assertEquals for content verification
+- Follow UnorderedListConverter class structure: constructor with XWPFDocument, ensureNumberingDefinition(), convert methods
+- Use Flexmark NodeVisitor pattern for AST traversal (VisitHandler)
+- Use Apache POI's XWPFNumbering with CTAbstractNum for numbering definition
+- Set STNumberFormat.DECIMAL for numbered list format
+- Set paragraph.setNumID() for numbering
+- Follow test pattern from UnorderedListConverterTest for unit tests
+- Use @TempDir for test file handling
+- Use assertNotNull/assertThrows for validation tests
 
 PLAN:
-1. Create CodeBlockConverter.java in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
-   - Constructor taking XWPFDocument with null validation
-   - addCodeBlock(String code) method creating paragraph with monospace font and background shading
-   - convertFencedCodeBlock(FencedCodeBlock block) method extracting content via getContentChars()
-   - convertDocument() method using NodeVisitor with FencedCodeBlock handler
-   - Private getTextFromNode() and appendTextFromNode() helpers for text extraction
-   - Protected getDocument() method returning XWPFDocument instance
+1. Create OrderedListConverter class in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
+   - Constructor accepting XWPFDocument, throwing IllegalArgumentException for null
+   - ensureNumberingDefinition() method creating decimal numbering (STNumberFormat.DECIMAL)
+   - addOrderedListItem(String text) method for adding single numbered item
+   - convertOrderedList(OrderedList list) method for Flexmark AST conversion
+   - convertDocument(Document) method using NodeVisitor pattern
+   - getTextFromNode(Node) helper for text extraction
+   - appendTextFromNode(Node, StringBuilder) recursive helper
+   - protected getDocument() accessor
 
-2. Create CodeBlockConverterTest.java in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
-   - Constructor validation tests (null document, normal initialization)
-   - addCodeBlock tests: simple code, multiline code, empty code, special characters
-   - convertFencedCodeBlock tests: extracting from Flexmark AST nodes
-   - convertDocument tests: multiple code blocks, mixed content, no code blocks
-   - Font verification tests: monospace Courier New font
-   - Formatting tests: background shading, spacing before/after
-   - Document persistence test: save/reopen formatting persists
-
-3. Run Maven test to verify all tests pass
+2. Create OrderedListConverterTest class in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
+   - Constructor tests (valid, null)
+   - addOrderedListItem tests (valid text, empty text, special characters, unicode, null, long text, multiple items)
+   - convertOrderedList tests (simple list, null, single item, empty list)
+   - convertDocument tests (multiple lists, no lists, null, mixed content)
+   - Persistence test (saved document reopened, numbering persists)
+   - Numbering verification tests (numId is set correctly)
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java
-- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/CodeBlockConverterTest.java
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/OrderedListConverter.java
+- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/OrderedListConverterTest.java
 
-FILES_TO_MODIFY:
-- (none - new files only)
+FILES_TO_MODIFY: None
 
-TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=CodeBlockConverterTest > /tmp/bjarne-75577_1768572068/codeblock_test.log 2>&1; echo "Exit code: $?"
+TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=OrderedListConverterTest
 
 OUTCOME_VERIFICATION:
-- Run `mvn test -Dtest=CodeBlockConverterTest` and verify all tests pass
-- Check log file for any errors: `grep -i "error\|fail\|exception" /tmp/bjarne-75577_1768572068/codeblock_test.log | head -30`
-- Verify FencedCodeBlock is correctly parsed: `grep -n "FencedCodeBlock" MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java`
-- Verify monospace font usage: `grep -n "Courier New" MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java`
+- Run mvn test -Dtest=OrderedListConverterTest - All tests pass
+- Verify Word document has numbered paragraphs with numID set
+- Verify numbering format is decimal (1, 2, 3, ...)
+- Verify test coverage for ordered list conversion
+
+NOTE: 🟡 ISSUE: This task requires tests to be created. The OrderedListConverterTest must verify:
+- Numbering ID is set on paragraphs
+- Decimal number format is used
+- Content is preserved correctly
+- Numbering persists after save/reopen
