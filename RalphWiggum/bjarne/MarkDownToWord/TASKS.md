@@ -5,11 +5,11 @@
 - [x] Create MarkDownToWordSource directory structure → Directory exists with src/main, src/test, testFiles subdirectories
 - [x] Create Maven pom.xml with required dependencies → pom.xml contains Apache POI and Flexmark-java dependencies
 - [x] Create base Java package structure → com.markdowntoword package with main and converter subpackages
-- [ ] Create basic README.md template → README.md exists in MarkDownToWordSource with placeholder content
+- [x] Create basic README.md template → README.md exists in MarkDownToWordSource with placeholder content
 
 ## Core Conversion Engine
 
-- [ ] Create MarkdownParser class → Can parse a Markdown file and return a document AST
+- [x] Create MarkdownParser class → Note: Flexmark parser doesn't need NodeExtensionList for default behavior
 - [ ] Create WordDocumentBuilder class → Can create and write .docx files with basic content
 - [ ] Implement heading conversion → Markdown headings (# ## ###) convert to Word paragraphs with appropriate styles
 - [ ] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
