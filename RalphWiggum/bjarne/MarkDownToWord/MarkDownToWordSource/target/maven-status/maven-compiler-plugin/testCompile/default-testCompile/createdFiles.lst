@@ -1,0 +1,3 @@
+com/markdowntoword/converter/WordDocumentBuilderTest.class
+com/markdowntoword/converter/ParagraphConverterTest.class
+com/markdowntoword/converter/HeadingConverterTest.class

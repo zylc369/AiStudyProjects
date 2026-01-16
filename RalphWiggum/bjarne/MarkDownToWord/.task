@@ -1,0 +1,49 @@
+TASK: Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
+
+ACTION: Create a ParagraphConverter class that converts Flexmark Paragraph AST nodes to Word XWPFParagraph elements, following the same pattern as HeadingConverter
+
+EXPECTED_OUTCOME: Markdown paragraphs are converted to Word paragraphs with correct text content
+
+EXISTING_CODE:
+- WordDocumentBuilder.java: Has XWPFDocument reference and addParagraph(String text) method for creating basic paragraphs
+- HeadingConverter.java: Shows pattern for converter classes - takes XWPFDocument in constructor, uses NodeVisitor for AST traversal, has convertDocument method, uses getTextFromNode helper
+- MarkdownParser.java: Parser that creates Flexmark AST Document
+
+PATTERNS:
+- Converter pattern: Classes take XWPFDocument in constructor, throw IllegalArgumentException for null parameters
+- NodeVisitor pattern: Use Flexmark's NodeVisitor with VisitHandler to traverse AST nodes
+- Text extraction: Recursive method to extract text from Flexmark AST nodes and children
+- Test pattern: Use @TempDir for file IO, @AfterEach for cleanup, assertThrows for exception testing
+
+PLAN:
+1. Create ParagraphConverter class in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
+   - Constructor takes XWPFDocument (with null check)
+   - addParagraph(String text) method creates Word paragraph (similar to WordDocumentBuilder's method)
+   - convertParagraph(Paragraph node) method extracts text from Flexmark Paragraph node
+   - convertDocument(Document doc) method uses NodeVisitor to visit all Paragraph nodes
+   - Reuse getTextFromNode/appendTextFromNode helper methods from HeadingConverter
+
+2. Create ParagraphConverterTest class in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
+   - Test constructor with valid and null document
+   - Test addParagraph with various text (valid, empty, special characters)
+   - Test convertParagraph with Flexmark Paragraph nodes
+   - Test convertDocument with multiple paragraphs
+   - Test convertDocument with mixed content (paragraphs and headings)
+   - Test saved document can be reopened with content preserved
+
+FILES_TO_CREATE:
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/ParagraphConverter.java
+- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/ParagraphConverterTest.java
+
+FILES_TO_MODIFY: None
+
+TEST_COMMAND: cd MarkDownToWordSource && mvn test
+
+OUTCOME_VERIFICATION:
+- Test addParagraph creates correct number of paragraphs with correct text
+- Test convertParagraph extracts text correctly from Flexmark Paragraph AST nodes
+- Test convertDocument processes all Paragraph nodes in document
+- Test saved document can be reopened and content is preserved
+
+Sources:
+- [Flexmark Documentation](https://github.com/vsch/flexmark-java)

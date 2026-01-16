@@ -12,7 +12,7 @@
 - [x] Create MarkdownParser class → Note: Flexmark parser doesn't need NodeExtensionList for default behavior
 - [x] Create WordDocumentBuilder class → Can create and write .docx files with basic content
 - [x] Implement heading conversion → Note: Used Flexmark's NodeVisitor pattern for AST traversal
-- [ ] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
+- [x] Implement paragraph conversion → Note: Flexmark treats consecutive lines as single paragraph; blank lines separate paragraphs
 - [ ] Implement bold formatting → Markdown **text** converts to Word bold text
 - [ ] Implement italic formatting → Markdown *text* converts to Word italic text
 - [ ] Implement bold-italic combination → Markdown ***text*** converts to Word bold+italic text
