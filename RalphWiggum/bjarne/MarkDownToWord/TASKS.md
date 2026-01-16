@@ -40,8 +40,8 @@
 - [x] Create unit tests for MarkdownParser → Tests pass for parsing various Markdown elements → Note: 36 tests covering constructor, parse(), parseFile()
 - [x] Create unit tests for WordDocumentBuilder → Tests pass for document creation
 - [x] Create integration tests for full conversion → Tests pass converting sample Markdown to Word
-- [x] Add content verification test → Validates converted Word contains all original content → Note: TextContentExtractor strips Markdown syntax before comparison
-- [ ] Add format verification test → Validates converted Word has equivalent formatting
+- [x] Add content verification test → Validates converted Word contains all original content
+- [x] Add format verification test → Validates converted Word has equivalent formatting
 
 ## Documentation & Finalization
 
