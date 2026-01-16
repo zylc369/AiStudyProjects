@@ -45,8 +45,8 @@
 
 ## Documentation & Finalization
 
-- [ ] Complete README.md with usage instructions → README.md contains clear usage examples
-- [ ] Add build instructions to README → README.md contains build and run commands
+- [x] Complete README.md with usage instructions → README.md contains clear usage examples
+- [x] Add build instructions to README → README.md contains build and run commands
 - [ ] Verify all test files in testFiles directory → No test artifacts outside testFiles directory
 - [ ] Run complete test suite → All tests pass with 100% content and format coverage
 - [ ] Build final JAR artifact → JAR file exists in target directory with all dependencies
