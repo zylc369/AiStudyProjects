@@ -2,6 +2,7 @@ package com.markdowntoword;
 
 import com.markdowntoword.converter.*;
 import com.markdowntoword.parser.MarkdownParser;
+import com.markdowntoword.util.TextContentExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.junit.jupiter.api.AfterEach;
@@ -128,6 +129,31 @@ class IntegrationTest {
         assertTrue(Files.size(testOutputFile) > 0, "Output file should not be empty");
 
         verifyWordDocumentHasContent(testOutputFile);
+    }
+
+    // ==================== Content Verification Tests ====================
+
+    @Test
+    void testContentVerification_WithTestMarkdown_ContainsAllOriginalText() throws IOException {
+        Path testMdFile = findTestFile("test.md");
+        testOutputFile = tempDir.resolve("test-output.docx");
+
+        // Extract original content from Markdown
+        String originalContent = TextContentExtractor.extractFromMarkdown(testMdFile);
+
+        // Perform conversion
+        assertDoesNotThrow(() -> performConversion(testMdFile.toString(), testOutputFile.toString()));
+
+        // Extract content from converted Word document
+        String convertedContent = TextContentExtractor.extractFromWord(testOutputFile);
+
+        // Verify all original content is present in converted document
+        assertTrue(
+                TextContentExtractor.containsAllContent(originalContent, convertedContent),
+                "Converted Word document should contain all original text content from Markdown.\n" +
+                "Original content: " + originalContent + "\n" +
+                "Converted content: " + convertedContent
+        );
     }
 
     // ==================== Helper Methods ====================

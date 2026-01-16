@@ -1,94 +1,48 @@
-TASK: Create Main class with CLI interface → Can run with java -jar <input.md> <output.docx> arguments
-ACTION: Create Main.java entry point class that accepts CLI arguments and orchestrates the Markdown to Word conversion
-EXPECTED_OUTCOME: User can run `java -jar MarkDownToWord-1.0.jar <input.md> <output.docx>` and it successfully converts Markdown to Word
+TASK: Add content verification test → Validates converted Word contains all original content
+ACTION: Implement a content verification test that extracts all text content from both the original Markdown and the converted Word document, then compares them to ensure no content is lost
+EXPECTED_OUTCOME: Test passes, confirming that all text content from the original Markdown is present in the converted Word document
 
 EXISTING_CODE:
-- MarkdownParser.java: parseFile(String filePath) method to read and parse Markdown files
-- WordDocumentBuilder.java: constructor to create document, save(String filePath) to write output
-- HeadingConverter.java: convertDocument(Document) for headings
-- ParagraphConverter.java: convertDocument(Document) for paragraphs
-- CodeBlockConverter.java: convertDocument(Document) for code blocks
-- TableConverter.java: convertDocument(Document) for tables
-- UnorderedListConverter.java: convertDocument(Document) for bullet lists
-- OrderedListConverter.java: convertDocument(Document) for numbered lists
-- NestedListConverter.java: convertDocument(Document) for nested lists
-- LinkConverter.java: convertDocument(Document) for links
-- InlineCodeConverter.java: convertDocument(Document) for inline code
-- TextFormatterConverter.java: convertDocument(Document) for bold/italic
-- ConversionException.java: thrown during document saving errors
-- MarkdownParseException.java: thrown during file reading/parsing errors
-- pom.xml: already configured with maven-shade-plugin, mainClass set to com.markdowntoword.Main
+- IntegrationTest.java (src/test/java/com/markdowntoword/IntegrationTest.java) - Has performConversion() helper and basic verification
+- ParagraphConverter.java - Contains getTextFromNode() and appendTextFromNode() methods for extracting text from Flexmark AST
+- test.md, test-formats.md, test-tables.md - Test Markdown files in testFiles directory
+- Apache POI XWPFDocument API - getParagraphs(), getTables(), getText() methods
+- Flexmark AST API - Document, Node, Text classes
 
 PATTERNS:
-- Use IllegalArgumentException for null/blank validation with descriptive messages
-- Use MarkdownParseException for file I/O/parsing errors
-- Use ConversionException for Word document generation errors
-- Follow existing JavaDoc comment style with @param, @throws tags
-- Print errors to stderr for exception messages
-- Return exit code 0 for success, 1 for failure (per SPECIFICATION.md)
+- Use @TempDir for test file isolation
+- Use @AfterEach for cleanup (deleteIfExists helper pattern)
+- Use recursive text extraction (see ParagraphConverter.getTextFromNode())
+- Use try-with-resources for file I/O
+- Use assertTrue/assertEquals for assertions
+- Helper methods: findTestFile(), performConversion(), verifyWordDocumentHasContent()
 
 PLAN:
-1. Create Main.java in com.markdowntoword package (not in main/ subdirectory)
-2. Implement main(String[] args) method with argument parsing:
-   - args[0]: input.md file path (required)
-   - args[1]: output.docx file path (optional, defaults to input filename with .docx extension)
-3. Add input file validation:
-   - Check if argument is provided
-   - Validate file exists and is readable
-4. Generate output file path if not provided:
-   - Extract filename from input path
-   - Replace .md extension with .docx
-5. Instantiate MarkdownParser and parse the input file
-6. Instantiate WordDocumentBuilder and apply all converters in sequence:
-   - HeadingConverter
-   - ParagraphConverter
-   - CodeBlockConverter
-   - TableConverter
-   - UnorderedListConverter
-   - OrderedListConverter
-   - NestedListConverter
-   - LinkConverter
-   - InlineCodeConverter
-   - TextFormatterConverter
-7. Save the document to the output file
-8. Handle exceptions with appropriate error messages to stderr and exit code 1
-9. Print success message with output file path
+1. Create TextContentExtractor utility class that:
+   a. Extracts all text from a Flexmark AST Document (reusing getTextFromNode pattern from ParagraphConverter)
+   b. Extracts all text from an XWPFDocument (paragraphs + table cells)
+   c. Normalizes text (trim, collapse whitespace)
+
+2. Add a new test method to IntegrationTest.java: testContentVerification_WithTestMarkdown_ContainsAllOriginalText()
+
+3. In the test:
+   a. Read test.md content
+   b. Perform conversion using existing performConversion()
+   c. Extract text from original Markdown using TextContentExtractor.extractFromMarkdown()
+   d. Open converted Word file and extract text using TextContentExtractor.extractFromWord()
+   e. Assert that all original text content is present in the Word document
+
+4. Handle the challenge that converters create multiple paragraphs - use content presence check rather than exact match
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/Main.java
+- src/test/java/com/markdowntoword/util/TextContentExtractor.java
 
-FILES_TO_MODIFY: (none)
+FILES_TO_MODIFY:
+- src/test/java/com/markdowntoword/IntegrationTest.java
 
-TEST_COMMAND:
-cd MarkDownToWordSource && mvn clean package > /tmp/bjarne-90941_1768579323/package.log 2>&1; echo "Exit code: $?"
+TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=IntegrationTest#testContentVerification_WithTestMarkdown_ContainsAllOriginalText > /tmp/bjarne-90941_1768579323/content-test.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- Build succeeds: grep -q "BUILD SUCCESS" /tmp/bjarne-90941_1768579323/package.log
-- JAR file exists: test -f MarkDownToWordSource/target/MarkDownToWord-1.0.jar
-- Main-Class is set: grep -q "Main-Class: com.markdowntoword.Main" MarkDownToWordSource/target/MarkDownToWord-1.0.jar 2>/dev/null || jar -tf MarkDownToWordSource/target/MarkDownToWord-1.0.jar | grep -q "META-INF/MANIFEST.MF"
-- Test conversion: create a sample .md file and run `java -jar target/MarkDownToWord-1.0.jar test.md test.docx` - verify .docx is created
-
-**NOTE: Tests for Main.java will be added in a future task (line 41 in TASKS.md: Create unit tests for MarkdownParser)**
-
-REVIEW_RESULT:
-OUTCOME_ACHIEVED: yes
-OUTCOME_EVIDENCE:
-- Build succeeds: grep confirmed "BUILD SUCCESS" in package.log
-- JAR file exists at MarkDownToWordSource/target/MarkDownToWord-1.0.jar
-- Main-Class is set to com.markdowntoword.Main in MANIFEST.MF
-- Conversion tested: sample .md file successfully converted to .docx (Microsoft OOXML format)
-- Conversion successful with subdirectory output: "Conversion successful. Output file: output/test.docx"
-
-BUILD_PASSED: yes
-TESTS_PASSED: yes (259 tests, 0 failures, 0 errors, 0 skipped)
-
-BLOCKERS: none
-
-ISSUES:
-- 🟡 ISSUE: WordDocumentBuilder.save() has NullPointerException bug when saving to current directory
-  - Location: WordDocumentBuilder.java:59, line `Files.createDirectories(path.getParent())`
-  - Root cause: `path.getParent()` returns null when file path has no parent (e.g., "test.docx")
-  - Impact: Cannot save output file to current directory, only works with subdirectory paths
-  - Fix: Add null check: `if (path.getParent() != null) Files.createDirectories(path.getParent());`
-
-SUGGESTIONS: none
+- Check test passes: grep -i "Tests run:" /tmp/bjarne-90941_1768579323/content-test.log | head -5
+- Verify no failures: grep -i "failures\|errors" /tmp/bjarne-90941_1768579323/content-test.log
+- Run all tests: cd MarkDownToWordSource && mvn test > /tmp/bjarne-90941_1768579323/full-test.log 2>&1; echo "Exit code: $?"
