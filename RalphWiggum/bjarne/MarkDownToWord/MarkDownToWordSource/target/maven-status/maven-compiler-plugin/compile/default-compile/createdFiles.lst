@@ -2,6 +2,7 @@ com/markdowntoword/converter/LinkConverter.class
 com/markdowntoword/converter/ParagraphConverter.class
 com/markdowntoword/converter/WordDocumentBuilder.class
 com/markdowntoword/converter/ConversionException.class
+com/markdowntoword/converter/CodeBlockConverter.class
 com/markdowntoword/exception/MarkdownParseException.class
 com/markdowntoword/converter/TextFormatterConverter.class
 com/markdowntoword/converter/InlineCodeConverter.class

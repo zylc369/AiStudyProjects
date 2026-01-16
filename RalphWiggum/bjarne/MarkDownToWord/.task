@@ -1,66 +1,56 @@
-TASK: Implement inline code conversion → Markdown `code` converts to Word inline monospace
+TASK: Implement code block conversion → Markdown ```code``` converts to Word preformatted text block
 
-ACTION: Create an InlineCodeConverter class that converts Flexmark Code AST nodes (backtick-enclosed text) to Word paragraphs with monospace font formatting
+ACTION: Create a CodeBlockConverter class that converts Flexmark FencedCodeBlock AST nodes to Word paragraphs with monospace font, background shading, and proper spacing.
 
-EXPECTED_OUTCOME: Markdown inline code like `code` is converted to Word text with monospace font family (Courier New or similar) displayed consistently
+EXPECTED_OUTCOME: Markdown fenced code blocks (```language\ncode\n```) convert to Word paragraphs with Courier New monospace font, gray background shading, and spacing before/after for visual separation.
 
 EXISTING_CODE:
-- com.markdowntoword.converter.TextFormatterConverter (reference for converter pattern)
-- com.markdowntoword.converter.LinkConverter (reference for converter pattern)
-- com.markdowntoword.converter.HeadingConverter (reference for converter pattern)
-- com.markdowntoword.converter.ParagraphConverter (reference for converter pattern)
-- com.vladsch.flexmark.ast.Code (Flexmark AST node for inline code)
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/InlineCodeConverter.java - Pattern for monospace font, NodeVisitor usage, getTextFromNode method
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/WordDocumentBuilder.java - XWPFDocument access pattern
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/ParagraphConverter.java - Text extraction and visitor pattern
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/HeadingConverter.java - NodeVisitor pattern reference
+- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/InlineCodeConverterTest.java - Test patterns
 
 PATTERNS:
-- Converter classes take XWPFDocument in constructor, store as final field
-- Constructor validates document is not null with IllegalArgumentException
-- Use add[Format]Text(String) method for direct creation
-- Use convert[Node](Node) method for AST node conversion
-- Use convertDocument(Document) method with NodeVisitor pattern
-- Use private getTextFromNode(Node) and appendTextFromNode(Node, StringBuilder) helper methods
-- Protected getDocument() method returns underlying XWPFDocument
-- Tests follow JUnit 5 pattern with @TempDir and @AfterEach cleanup
+- Constructor takes XWPFDocument, throws IllegalArgumentException for null
+- addCodeBlock(String code) method creates paragraph with monospace font
+- convertFencedCodeBlock(FencedCodeBlock block) extracts content using getContentChars()
+- convertDocument() uses NodeVisitor with VisitHandler<FencedCodeBlock>
+- getTextFromNode() and appendTextFromNode() for recursive text extraction
+- Constant MONOSPACE_FONT_FAMILY = "Courier New"
+- Tests use @TempDir, @AfterEach cleanup, assertEquals for content verification
 
 PLAN:
-1. Create InlineCodeConverter.java in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
-   - Constructor with XWPFDocument parameter and null validation
-   - addInlineCode(String) method that creates paragraph with monospace font
-   - convertCode(Code) method for Flexmark Code AST node conversion
-   - convertDocument(Document) method using NodeVisitor to visit all Code nodes
-   - getTextFromNode(Node) helper method to extract text content
-   - appendTextFromNode(Node, StringBuilder) helper for recursive text extraction
-   - Protected getDocument() method
+1. Create CodeBlockConverter.java in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
+   - Constructor taking XWPFDocument with null validation
+   - addCodeBlock(String code) method creating paragraph with monospace font and background shading
+   - convertFencedCodeBlock(FencedCodeBlock block) method extracting content via getContentChars()
+   - convertDocument() method using NodeVisitor with FencedCodeBlock handler
+   - Private getTextFromNode() and appendTextFromNode() helpers for text extraction
+   - Protected getDocument() method returning XWPFDocument instance
 
-2. Create InlineCodeConverterTest.java in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
-   - Constructor initialization test
-   - Constructor null validation test
-   - addInlineCode with simple text test (verifies text and monospace font)
-   - addInlineCode with multiple words test
-   - addInlineCode with null text test (IllegalArgumentException)
-   - addInlineCode with empty text test
-   - addInlineCode with special characters test
-   - Multiple inline codes sequentially test
-   - convertCode with simple Code node test
-   - convertCode null validation test
-   - convertDocument with multiple Code nodes test
-   - convertDocument with no Code nodes test
-   - convertDocument null validation test
-   - convertDocument with mixed content test
-   - Saved document reopened test (verifies formatting persists)
-   - Monospace font verification test (checks font family is monospace)
+2. Create CodeBlockConverterTest.java in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
+   - Constructor validation tests (null document, normal initialization)
+   - addCodeBlock tests: simple code, multiline code, empty code, special characters
+   - convertFencedCodeBlock tests: extracting from Flexmark AST nodes
+   - convertDocument tests: multiple code blocks, mixed content, no code blocks
+   - Font verification tests: monospace Courier New font
+   - Formatting tests: background shading, spacing before/after
+   - Document persistence test: save/reopen formatting persists
+
+3. Run Maven test to verify all tests pass
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/InlineCodeConverter.java
-- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/InlineCodeConverterTest.java
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java
+- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/CodeBlockConverterTest.java
 
 FILES_TO_MODIFY:
-- None
+- (none - new files only)
 
-TEST_COMMAND: cd MarkDownToWordSource && mvn test > /tmp/bjarne-75577_1768572068/test.log 2>&1; echo "Exit code: $?"
+TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=CodeBlockConverterTest > /tmp/bjarne-75577_1768572068/codeblock_test.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- InlineCodeConverter.java exists in converter package
-- InlineCodeConverterTest.java exists in test package
-- mvn test runs and all InlineCodeConverter tests pass
-- Test verifies monospace font is applied (e.g., run.getFontFamily() contains "Courier" or is monospace style)
-- Test verifies inline code content is correctly extracted and displayed
+- Run `mvn test -Dtest=CodeBlockConverterTest` and verify all tests pass
+- Check log file for any errors: `grep -i "error\|fail\|exception" /tmp/bjarne-75577_1768572068/codeblock_test.log | head -30`
+- Verify FencedCodeBlock is correctly parsed: `grep -n "FencedCodeBlock" MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java`
+- Verify monospace font usage: `grep -n "Courier New" MarkDownToWordSource/src/main/java/com/markdowntoword/converter/CodeBlockConverter.java`

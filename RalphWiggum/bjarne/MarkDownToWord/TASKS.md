@@ -21,7 +21,7 @@
 
 - [x] Implement link conversion → Markdown [text](url) converts to Word hyperlink
 - [x] Implement inline code conversion → Note: Used Courier New font for monospace display
-- [ ] Implement code block conversion → Markdown ```code``` converts to Word preformatted text block
+- [x] Implement code block conversion → Note: Uses Courier New font with spacing for visual separation
 - [ ] Implement unordered list conversion → Markdown - item converts to Word bullet list
 - [ ] Implement ordered list conversion → Markdown 1. item converts to Word numbered list
 - [ ] Implement nested list conversion → Markdown nested lists convert to Word nested lists
