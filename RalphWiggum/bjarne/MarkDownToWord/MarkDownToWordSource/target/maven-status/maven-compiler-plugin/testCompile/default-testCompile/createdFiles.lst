@@ -1,3 +1,6 @@
+com/markdowntoword/converter/TextFormatterConverterTest.class
 com/markdowntoword/converter/WordDocumentBuilderTest.class
 com/markdowntoword/converter/ParagraphConverterTest.class
+com/markdowntoword/converter/InlineCodeConverterTest.class
 com/markdowntoword/converter/HeadingConverterTest.class
+com/markdowntoword/converter/LinkConverterTest.class

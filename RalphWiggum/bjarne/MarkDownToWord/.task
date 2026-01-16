@@ -1,49 +1,66 @@
-TASK: Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
+TASK: Implement inline code conversion → Markdown `code` converts to Word inline monospace
 
-ACTION: Create a ParagraphConverter class that converts Flexmark Paragraph AST nodes to Word XWPFParagraph elements, following the same pattern as HeadingConverter
+ACTION: Create an InlineCodeConverter class that converts Flexmark Code AST nodes (backtick-enclosed text) to Word paragraphs with monospace font formatting
 
-EXPECTED_OUTCOME: Markdown paragraphs are converted to Word paragraphs with correct text content
+EXPECTED_OUTCOME: Markdown inline code like `code` is converted to Word text with monospace font family (Courier New or similar) displayed consistently
 
 EXISTING_CODE:
-- WordDocumentBuilder.java: Has XWPFDocument reference and addParagraph(String text) method for creating basic paragraphs
-- HeadingConverter.java: Shows pattern for converter classes - takes XWPFDocument in constructor, uses NodeVisitor for AST traversal, has convertDocument method, uses getTextFromNode helper
-- MarkdownParser.java: Parser that creates Flexmark AST Document
+- com.markdowntoword.converter.TextFormatterConverter (reference for converter pattern)
+- com.markdowntoword.converter.LinkConverter (reference for converter pattern)
+- com.markdowntoword.converter.HeadingConverter (reference for converter pattern)
+- com.markdowntoword.converter.ParagraphConverter (reference for converter pattern)
+- com.vladsch.flexmark.ast.Code (Flexmark AST node for inline code)
 
 PATTERNS:
-- Converter pattern: Classes take XWPFDocument in constructor, throw IllegalArgumentException for null parameters
-- NodeVisitor pattern: Use Flexmark's NodeVisitor with VisitHandler to traverse AST nodes
-- Text extraction: Recursive method to extract text from Flexmark AST nodes and children
-- Test pattern: Use @TempDir for file IO, @AfterEach for cleanup, assertThrows for exception testing
+- Converter classes take XWPFDocument in constructor, store as final field
+- Constructor validates document is not null with IllegalArgumentException
+- Use add[Format]Text(String) method for direct creation
+- Use convert[Node](Node) method for AST node conversion
+- Use convertDocument(Document) method with NodeVisitor pattern
+- Use private getTextFromNode(Node) and appendTextFromNode(Node, StringBuilder) helper methods
+- Protected getDocument() method returns underlying XWPFDocument
+- Tests follow JUnit 5 pattern with @TempDir and @AfterEach cleanup
 
 PLAN:
-1. Create ParagraphConverter class in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
-   - Constructor takes XWPFDocument (with null check)
-   - addParagraph(String text) method creates Word paragraph (similar to WordDocumentBuilder's method)
-   - convertParagraph(Paragraph node) method extracts text from Flexmark Paragraph node
-   - convertDocument(Document doc) method uses NodeVisitor to visit all Paragraph nodes
-   - Reuse getTextFromNode/appendTextFromNode helper methods from HeadingConverter
+1. Create InlineCodeConverter.java in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
+   - Constructor with XWPFDocument parameter and null validation
+   - addInlineCode(String) method that creates paragraph with monospace font
+   - convertCode(Code) method for Flexmark Code AST node conversion
+   - convertDocument(Document) method using NodeVisitor to visit all Code nodes
+   - getTextFromNode(Node) helper method to extract text content
+   - appendTextFromNode(Node, StringBuilder) helper for recursive text extraction
+   - Protected getDocument() method
 
-2. Create ParagraphConverterTest class in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
-   - Test constructor with valid and null document
-   - Test addParagraph with various text (valid, empty, special characters)
-   - Test convertParagraph with Flexmark Paragraph nodes
-   - Test convertDocument with multiple paragraphs
-   - Test convertDocument with mixed content (paragraphs and headings)
-   - Test saved document can be reopened with content preserved
+2. Create InlineCodeConverterTest.java in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
+   - Constructor initialization test
+   - Constructor null validation test
+   - addInlineCode with simple text test (verifies text and monospace font)
+   - addInlineCode with multiple words test
+   - addInlineCode with null text test (IllegalArgumentException)
+   - addInlineCode with empty text test
+   - addInlineCode with special characters test
+   - Multiple inline codes sequentially test
+   - convertCode with simple Code node test
+   - convertCode null validation test
+   - convertDocument with multiple Code nodes test
+   - convertDocument with no Code nodes test
+   - convertDocument null validation test
+   - convertDocument with mixed content test
+   - Saved document reopened test (verifies formatting persists)
+   - Monospace font verification test (checks font family is monospace)
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/ParagraphConverter.java
-- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/ParagraphConverterTest.java
+- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/InlineCodeConverter.java
+- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/InlineCodeConverterTest.java
 
-FILES_TO_MODIFY: None
+FILES_TO_MODIFY:
+- None
 
-TEST_COMMAND: cd MarkDownToWordSource && mvn test
+TEST_COMMAND: cd MarkDownToWordSource && mvn test > /tmp/bjarne-75577_1768572068/test.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- Test addParagraph creates correct number of paragraphs with correct text
-- Test convertParagraph extracts text correctly from Flexmark Paragraph AST nodes
-- Test convertDocument processes all Paragraph nodes in document
-- Test saved document can be reopened and content is preserved
-
-Sources:
-- [Flexmark Documentation](https://github.com/vsch/flexmark-java)
+- InlineCodeConverter.java exists in converter package
+- InlineCodeConverterTest.java exists in test package
+- mvn test runs and all InlineCodeConverter tests pass
+- Test verifies monospace font is applied (e.g., run.getFontFamily() contains "Courier" or is monospace style)
+- Test verifies inline code content is correctly extracted and displayed

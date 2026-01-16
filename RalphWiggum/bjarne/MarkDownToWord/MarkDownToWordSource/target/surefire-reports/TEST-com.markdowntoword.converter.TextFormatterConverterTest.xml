@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.markdowntoword.converter.HeadingConverterTest" time="0.334" tests="29" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.markdowntoword.converter.TextFormatterConverterTest" time="0.091" tests="36" errors="0" skipped="0" failures="0">
   <properties>
     <property name="http.proxyHost" value="127.0.0.1"/>
     <property name="java.specification.version" value="17"/>
@@ -60,36 +60,40 @@
     <property name="java.class.version" value="61.0"/>
     <property name="http.proxyPort" value="1082"/>
   </properties>
-  <testcase name="convertHeading_withLevel3_createsParagraphWithHeading3Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.219">
-    <system-err><![CDATA[ERROR StatusLogger Log4j2 could not find a logging implementation. Please add log4j-core to the classpath. Using SimpleLogger to log to the console...
-]]></system-err>
-  </testcase>
-  <testcase name="addHeading_withLevel1_createsParagraphWithHeading1Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.004"/>
-  <testcase name="addHeading_withLevel100_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.004"/>
-  <testcase name="addHeading_withLevel6_createsParagraphWithHeading6Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.004"/>
-  <testcase name="convertHeading_withLevel1_createsParagraphWithHeading1Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_withLevel7_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_withLevel4_createsParagraphWithHeading4Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="addHeading_withLevel2_createsParagraphWithHeading2Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="addHeading_withLevelZero_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="convertDocument_withNoHeadings_createsNoParagraphs" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.006"/>
-  <testcase name="addHeading_withNullText_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="constructor_initializesDocument" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="savedDocument_reopened_headingsArePreserved" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.026"/>
-  <testcase name="addHeading_withNegativeLevel_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="convertHeadingTextExtraction_withSpecialCharacters_correctlyExtractsText" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_withEmptyText_createsParagraphWithCorrectStyle" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="convertHeading_withLevel2_createsParagraphWithHeading2Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="convertHeadingTextExtraction_withSimpleText_correctlyExtractsText" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="addHeading_withLevel5_createsParagraphWithHeading5Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_multipleHeadings_sequentially" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="convertDocument_withMixedContent_convertsOnlyHeadings" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="constructor_withNullDocument_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.001"/>
-  <testcase name="convertHeading_withMultipleHeadings_sequentially" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="convertDocument_withNull_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="verifyHeadingConversion_withFullMarkdownDocument_createsCorrectWordParagraphs" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_withLevel3_createsParagraphWithHeading3Style" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.003"/>
-  <testcase name="addHeading_withSpecialCharactersInText_createsParagraphWithCorrectContent" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
-  <testcase name="convertHeading_withNull_throwsIllegalArgumentException" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.001"/>
-  <testcase name="convertDocument_withMultipleHeadings_convertsAllHeadings" classname="com.markdowntoword.converter.HeadingConverterTest" time="0.002"/>
+  <testcase name="addBoldItalicText_withSimpleText_createsParagraphWithBoldAndItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.009"/>
+  <testcase name="addBoldItalicText_withNullText_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldText_withMultipleWords_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addItalicText_withSpecialCharacters_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="italicText_notBold_verifyOnlyItalicIsSet" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addItalicText_withNullText_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="addBoldText_withSimpleText_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertDocument_withMixedContent_convertsOnlyFormattedText" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.004"/>
+  <testcase name="convertStrongEmphasis_withMultipleWords_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="savedDocument_reopened_boldFormattingIsPreserved" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.008"/>
+  <testcase name="convertEmphasis_withNull_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldItalicText_withMultipleWords_createsParagraphWithBoldAndItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addItalicText_withMultipleWords_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertDocument_withNestedBoldItalic_createsBoldItalicParagraph" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldText_multipleBoldTexts_sequentially" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="constructor_initializesDocument" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="addBoldItalicText_withSpecialCharacters_createsParagraphWithBoldAndItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertEmphasis_withSimpleText_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldText_withSpecialCharacters_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addItalicText_withEmptyText_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="addBoldItalicText_withEmptyText_createsParagraphWithBoldAndItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="convertDocument_withNoFormattings_createsNoParagraphs" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="savedDocument_reopened_boldItalicFormattingIsPreserved" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.007"/>
+  <testcase name="addItalicText_multipleItalicTexts_sequentially" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="constructor_withNullDocument_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.0"/>
+  <testcase name="addItalicText_withSimpleText_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="convertStrongEmphasis_withSimpleText_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertDocument_withNull_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertEmphasis_withMultipleWords_createsParagraphWithItalicFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="savedDocument_reopened_italicFormattingIsPreserved" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.006"/>
+  <testcase name="convertDocument_withTripleAsterisks_createsBoldItalicParagraph" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldText_withNullText_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.002"/>
+  <testcase name="addBoldText_withEmptyText_createsParagraphWithBoldFormatting" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertDocument_withMultipleFormattings_convertsAllFormattings" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="boldText_notItalic_verifyOnlyBoldIsSet" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
+  <testcase name="convertStrongEmphasis_withNull_throwsIllegalArgumentException" classname="com.markdowntoword.converter.TextFormatterConverterTest" time="0.001"/>
 </testsuite>

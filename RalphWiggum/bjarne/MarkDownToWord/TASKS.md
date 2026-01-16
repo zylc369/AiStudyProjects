@@ -19,8 +19,8 @@
 
 ## Advanced Formatting
 
-- [ ] Implement link conversion → Markdown [text](url) converts to Word hyperlink
-- [ ] Implement inline code conversion → Markdown `code` converts to Word inline monospace
+- [x] Implement link conversion → Markdown [text](url) converts to Word hyperlink
+- [x] Implement inline code conversion → Note: Used Courier New font for monospace display
 - [ ] Implement code block conversion → Markdown ```code``` converts to Word preformatted text block
 - [ ] Implement unordered list conversion → Markdown - item converts to Word bullet list
 - [ ] Implement ordered list conversion → Markdown 1. item converts to Word numbered list
