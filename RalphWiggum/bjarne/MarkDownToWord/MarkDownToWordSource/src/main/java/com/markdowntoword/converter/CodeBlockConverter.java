@@ -8,6 +8,9 @@ import com.vladsch.flexmark.util.ast.VisitHandler;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTShd;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STShd;
 
 /**
  * Converter for adding Markdown-style code blocks to Word documents.
@@ -19,6 +22,7 @@ public class CodeBlockConverter {
     private static final String MONOSPACE_FONT_FAMILY = "Courier New";
     private static final int SPACING_BEFORE_POINTS = 100;
     private static final int SPACING_AFTER_POINTS = 100;
+    private static final String BACKGROUND_COLOR = "EEEEEE";
 
     private final XWPFDocument document;
 
@@ -53,6 +57,14 @@ public class CodeBlockConverter {
         // Set spacing for visual separation
         paragraph.setSpacingBefore(SPACING_BEFORE_POINTS);
         paragraph.setSpacingAfter(SPACING_AFTER_POINTS);
+
+        // Set background shading
+        CTPPr pPr = paragraph.getCTP().getPPr();
+        if (pPr == null) {
+            pPr = paragraph.getCTP().addNewPPr();
+        }
+        CTShd shd = pPr.isSetShd() ? pPr.getShd() : pPr.addNewShd();
+        shd.setFill(BACKGROUND_COLOR);
 
         // Split code into lines for proper formatting
         String[] lines = code.split("\\r?\\n");

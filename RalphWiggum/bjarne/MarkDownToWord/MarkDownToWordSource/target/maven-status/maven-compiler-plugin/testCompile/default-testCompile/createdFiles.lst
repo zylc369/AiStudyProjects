@@ -1,7 +1,11 @@
 com/markdowntoword/converter/WordDocumentBuilderTest.class
+com/markdowntoword/converter/OrderedListConverterTest.class
+com/markdowntoword/converter/TableConverterTest.class
 com/markdowntoword/converter/HeadingConverterTest.class
 com/markdowntoword/converter/TextFormatterConverterTest.class
 com/markdowntoword/converter/ParagraphConverterTest.class
 com/markdowntoword/converter/InlineCodeConverterTest.class
 com/markdowntoword/converter/CodeBlockConverterTest.class
+com/markdowntoword/converter/NestedListConverterTest.class
+com/markdowntoword/converter/UnorderedListConverterTest.class
 com/markdowntoword/converter/LinkConverterTest.class

@@ -9,6 +9,8 @@ import com.vladsch.flexmark.util.ast.VisitHandler;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFNumbering;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFAbstractNum;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import java.math.BigInteger;
 
@@ -149,6 +151,7 @@ public class UnorderedListConverter {
     /**
      * Ensures that the document has a numbering definition for bullet lists.
      * Creates a simple single-level bullet numbering definition if one doesn't exist.
+     * This method creates a proper abstract numbering definition with bullet formatting.
      */
     private void ensureNumberingDefinition() {
         XWPFNumbering numbering = document.getNumbering();
@@ -161,8 +164,27 @@ public class UnorderedListConverter {
             return;
         }
 
-        // Create a new bullet numbering definition
-        // The default XWPFNumbering.createBullet() creates a bullet numbering definition
-        numbering.addNum(BigInteger.valueOf(SINGLE_LEVEL_NUM_ID));
+        // Create an abstract numbering definition with bullet formatting
+        CTAbstractNum abstractNum = CTAbstractNum.Factory.newInstance();
+
+        // Build the bullet numbering level XML using addNewLvl() and set properties
+        CTDecimalNumber start = abstractNum.addNewLvl().addNewStart();
+        start.setVal(BigInteger.ONE);
+
+        CTNumFmt numFmt = abstractNum.getLvlArray(0).addNewNumFmt();
+        numFmt.setVal(STNumberFormat.BULLET);
+
+        CTLevelText lvlText = abstractNum.getLvlArray(0).addNewLvlText();
+        lvlText.setVal("•");
+
+        // Wrap the CTAbstractNum in XWPFAbstractNum
+        XWPFAbstractNum xwpfAbstractNum = new XWPFAbstractNum(abstractNum);
+        xwpfAbstractNum.setNumbering(numbering);
+
+        // Add the abstract numbering definition and get its ID
+        BigInteger abstractNumId = numbering.addAbstractNum(xwpfAbstractNum);
+
+        // Link the abstract numbering to a concrete numbering instance with ID 1
+        numbering.addNum(abstractNumId);
     }
 }

@@ -56,7 +56,10 @@ public class WordDocumentBuilder {
 
         Path path = Paths.get(filePath);
         try {
-            Files.createDirectories(path.getParent());
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
         } catch (IOException e) {
             throw new ConversionException("Failed to create directory for file: " + filePath, e);
         }

@@ -7,6 +7,8 @@ import com.vladsch.flexmark.parser.Parser;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTShd;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -411,6 +413,109 @@ class CodeBlockConverterTest {
         // Verify monospace font on all runs
         for (XWPFRun run : runs) {
             assertEquals("Courier New", run.getFontFamily());
+        }
+    }
+
+    @Test
+    void codeBlockHasBackgroundShading() {
+        document = new XWPFDocument();
+        CodeBlockConverter converter = new CodeBlockConverter(document);
+
+        converter.addCodeBlock("test code");
+
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        assertEquals(1, paragraphs.size());
+
+        XWPFParagraph paragraph = paragraphs.get(0);
+
+        // Verify background shading is set
+        CTPPr pPr = paragraph.getCTP().getPPr();
+        assertNotNull(pPr, "Paragraph properties should not be null");
+
+        CTShd shd = pPr.getShd();
+        assertNotNull(shd, "Background shading should be set");
+        assertNotNull(shd.getFill(), "Background fill color should be set");
+
+        // Verify the fill value represents a light gray color
+        // The fill can be returned as either "EEEEEE" or as a byte array representation
+        Object fillValue = shd.getFill();
+        if (fillValue instanceof String) {
+            assertEquals("EEEEEE", fillValue, "Background color should be EEEEEE (light gray)");
+        } else if (fillValue instanceof byte[]) {
+            byte[] bytes = (byte[]) fillValue;
+            // Check that it's a light gray color (RGB: 238, 238, 238)
+            assertEquals(3, bytes.length);
+            assertEquals(-18, bytes[0]); // 0xEE = 238, as signed byte = -18
+            assertEquals(-18, bytes[1]);
+            assertEquals(-18, bytes[2]);
+        }
+    }
+
+    @Test
+    void codeBlockHasSpacingBeforeAndAfter() {
+        document = new XWPFDocument();
+        CodeBlockConverter converter = new CodeBlockConverter(document);
+
+        converter.addCodeBlock("test code");
+
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        assertEquals(1, paragraphs.size());
+
+        XWPFParagraph paragraph = paragraphs.get(0);
+
+        // Verify spacing before and after are set
+        assertEquals(100, paragraph.getSpacingBefore(), "Spacing before should be 100 points");
+        assertEquals(100, paragraph.getSpacingAfter(), "Spacing after should be 100 points");
+    }
+
+    @Test
+    void formattingPersistsAfterSave() throws IOException {
+        document = new XWPFDocument();
+        CodeBlockConverter converter = new CodeBlockConverter(document);
+
+        converter.addCodeBlock("test code");
+
+        Path testFile = tempDir.resolve("test-formatting.docx");
+        try (FileOutputStream outputStream = new FileOutputStream(testFile.toFile())) {
+            document.write(outputStream);
+        }
+        document.close();
+
+        try (XWPFDocument reopenedDocument = new XWPFDocument(new FileInputStream(testFile.toFile()))) {
+            List<XWPFParagraph> paragraphs = reopenedDocument.getParagraphs();
+            assertEquals(1, paragraphs.size());
+
+            XWPFParagraph paragraph = paragraphs.get(0);
+
+            // Verify background shading persists
+            CTPPr pPr = paragraph.getCTP().getPPr();
+            assertNotNull(pPr, "Paragraph properties should persist after save");
+            CTShd shd = pPr.getShd();
+            assertNotNull(shd, "Background shading should persist after save");
+            assertNotNull(shd.getFill(), "Background fill should persist after save");
+
+            // Verify the fill value represents a light gray color
+            // The fill can be returned as either "EEEEEE" or as a byte array representation
+            Object fillValue = shd.getFill();
+            if (fillValue instanceof String) {
+                assertEquals("EEEEEE", fillValue, "Background color should persist as EEEEEE");
+            } else if (fillValue instanceof byte[]) {
+                byte[] bytes = (byte[]) fillValue;
+                // Check that it's a light gray color (RGB: 238, 238, 238)
+                assertEquals(3, bytes.length);
+                assertEquals(-18, bytes[0]); // 0xEE = 238, as signed byte = -18
+                assertEquals(-18, bytes[1]);
+                assertEquals(-18, bytes[2]);
+            }
+
+            // Verify spacing persists
+            assertEquals(100, paragraph.getSpacingBefore(), "Spacing before should persist after save");
+            assertEquals(100, paragraph.getSpacingAfter(), "Spacing after should persist after save");
+
+            // Verify monospace font persists
+            List<XWPFRun> runs = paragraph.getRuns();
+            assertEquals(1, runs.size());
+            assertEquals("Courier New", runs.get(0).getFontFamily());
         }
     }
 }
