@@ -678,4 +678,48 @@ class TextFormatterConverterTest {
         assertFalse(run.isBold());
         assertTrue(run.isItalic());
     }
+
+    @Test
+    void convertDocument_withTripleAsterisks_createsBoldItalicParagraph() {
+        document = new XWPFDocument();
+        TextFormatterConverter converter = new TextFormatterConverter(document);
+
+        MarkdownParser parser = new MarkdownParser();
+        com.vladsch.flexmark.util.ast.Document markdownDocument = parser.parse("***bold italic text***");
+
+        converter.convertDocument(markdownDocument);
+
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        assertEquals(1, paragraphs.size());
+
+        XWPFParagraph paragraph = paragraphs.get(0);
+        assertEquals("bold italic text", paragraph.getText());
+
+        List<XWPFRun> runs = paragraph.getRuns();
+        assertEquals(1, runs.size());
+        assertTrue(runs.get(0).isBold());
+        assertTrue(runs.get(0).isItalic());
+    }
+
+    @Test
+    void convertDocument_withNestedBoldItalic_createsBoldItalicParagraph() {
+        document = new XWPFDocument();
+        TextFormatterConverter converter = new TextFormatterConverter(document);
+
+        MarkdownParser parser = new MarkdownParser();
+        com.vladsch.flexmark.util.ast.Document markdownDocument = parser.parse("**bold *and* italic**");
+
+        converter.convertDocument(markdownDocument);
+
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        assertEquals(1, paragraphs.size());
+
+        XWPFParagraph paragraph = paragraphs.get(0);
+        assertEquals("bold and italic", paragraph.getText());
+
+        List<XWPFRun> runs = paragraph.getRuns();
+        assertEquals(1, runs.size());
+        assertTrue(runs.get(0).isBold());
+        assertTrue(runs.get(0).isItalic());
+    }
 }

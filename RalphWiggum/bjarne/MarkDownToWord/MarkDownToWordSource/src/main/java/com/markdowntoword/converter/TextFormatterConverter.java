@@ -1,6 +1,7 @@
 package com.markdowntoword.converter;
 
 import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.util.ast.Node;
@@ -49,8 +50,8 @@ public class TextFormatterConverter {
 
     /**
      * Converts a Flexmark StrongEmphasis AST node to a Word paragraph with bold text.
-     * This method extracts the text content from the AST node
-     * and converts it to a Word paragraph with bold formatting.
+     * If the StrongEmphasis contains an Emphasis node (nested formatting like **bold *and* italic**),
+     * this is treated as the top-level bold formatting and creates a paragraph with bold-italic text.
      *
      * @param strongEmphasis the Flexmark StrongEmphasis AST node to convert
      * @throws IllegalArgumentException if strongEmphasis is null
@@ -60,8 +61,55 @@ public class TextFormatterConverter {
             throw new IllegalArgumentException("StrongEmphasis cannot be null");
         }
 
-        String text = getTextFromNode(strongEmphasis);
-        addBoldText(text);
+        // Only process top-level StrongEmphasis nodes (not nested inside Emphasis)
+        if (!(strongEmphasis.getParent() instanceof Paragraph)) {
+            return;
+        }
+
+        // Check if this StrongEmphasis contains an Emphasis node (nested formatting)
+        if (hasEmphasisChild(strongEmphasis)) {
+            // This is nested formatting like **bold *and* italic**
+            // The whole text should be bold, with parts also italic
+            String text = getTextFromNode(strongEmphasis);
+            addBoldItalicText(text);
+        } else {
+            String text = getTextFromNode(strongEmphasis);
+            addBoldText(text);
+        }
+    }
+
+    /**
+     * Checks if a node has an Emphasis child.
+     *
+     * @param node the node to check
+     * @return true if the node has an Emphasis child, false otherwise
+     */
+    private boolean hasEmphasisChild(Node node) {
+        Node child = node.getFirstChild();
+        while (child != null) {
+            if (child instanceof Emphasis) {
+                return true;
+            }
+            child = child.getNext();
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a node has a StrongEmphasis child.
+     *
+     * @param node the node to check
+     * @return true if the node has a StrongEmphasis child, false otherwise
+     */
+    private boolean hasStrongEmphasisChild(Node node) {
+        Node child = node.getFirstChild();
+        while (child != null) {
+            if (child instanceof StrongEmphasis) {
+                return true;
+            }
+            child = child.getNext();
+        }
+        return false;
     }
 
     /**
@@ -84,6 +132,9 @@ public class TextFormatterConverter {
      * Converts a Flexmark Emphasis AST node to a Word paragraph with italic text.
      * This method extracts the text content from the AST node
      * and converts it to a Word paragraph with italic formatting.
+     * Only processes top-level Emphasis nodes (those whose parent is a Paragraph).
+     * If the Emphasis contains a StrongEmphasis node (nested formatting like ***text***),
+     * this creates a paragraph with bold-italic text.
      *
      * @param emphasis the Flexmark Emphasis AST node to convert
      * @throws IllegalArgumentException if emphasis is null
@@ -93,8 +144,21 @@ public class TextFormatterConverter {
             throw new IllegalArgumentException("Emphasis cannot be null");
         }
 
-        String text = getTextFromNode(emphasis);
-        addItalicText(text);
+        // Only process top-level Emphasis nodes (not nested inside StrongEmphasis)
+        if (!(emphasis.getParent() instanceof Paragraph)) {
+            return;
+        }
+
+        // Check if this Emphasis contains a StrongEmphasis node (nested formatting)
+        if (hasStrongEmphasisChild(emphasis)) {
+            // This is nested formatting like ***text***
+            // The whole text should be bold-italic
+            String text = getTextFromNode(emphasis);
+            addBoldItalicText(text);
+        } else {
+            String text = getTextFromNode(emphasis);
+            addItalicText(text);
+        }
     }
 
     /**
