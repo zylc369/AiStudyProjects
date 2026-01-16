@@ -1,0 +1,10 @@
+# Test output files
+*.docx
+
+# Maven target directory
+MarkDownToWordSource/target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
