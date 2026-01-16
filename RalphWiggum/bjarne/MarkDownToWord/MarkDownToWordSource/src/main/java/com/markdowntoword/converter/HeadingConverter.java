@@ -1,5 +1,10 @@
 package com.markdowntoword.converter;
 
+import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.VisitHandler;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 
@@ -55,6 +60,82 @@ public class HeadingConverter {
         XWPFParagraph paragraph = document.createParagraph();
         paragraph.setStyle("Heading" + level);
         paragraph.createRun().setText(text);
+    }
+
+    /**
+     * Converts a Flexmark Heading AST node to a Word heading paragraph.
+     * This method extracts the heading level and text from the AST node
+     * and converts them to a Word heading with the appropriate style.
+     *
+     * @param heading the Flexmark Heading AST node to convert
+     * @throws IllegalArgumentException if heading is null
+     */
+    public void convertHeading(Heading heading) {
+        if (heading == null) {
+            throw new IllegalArgumentException("Heading cannot be null");
+        }
+
+        int level = heading.getLevel();
+        String text = getTextFromNode(heading);
+
+        addHeading(text, level);
+    }
+
+    /**
+     * Converts a Flexmark Document AST to Word headings.
+     * This method iterates through the document's children and converts
+     * all Heading nodes to Word paragraphs with appropriate styles.
+     *
+     * @param document the Flexmark Document AST to convert
+     * @throws IllegalArgumentException if document is null
+     */
+    public void convertDocument(com.vladsch.flexmark.util.ast.Document document) {
+        if (document == null) {
+            throw new IllegalArgumentException("Document cannot be null");
+        }
+
+        NodeVisitor visitor = new NodeVisitor(
+            new VisitHandler<>(Heading.class, this::convertHeading)
+        );
+
+        visitor.visit(document);
+    }
+
+    /**
+     * Extracts the text content from a Flexmark AST node.
+     * This method recursively visits child nodes to collect all text content.
+     *
+     * @param node the AST node to extract text from
+     * @return the concatenated text content of the node and its children
+     */
+    private String getTextFromNode(Node node) {
+        StringBuilder textBuilder = new StringBuilder();
+        appendTextFromNode(node, textBuilder);
+        return textBuilder.toString();
+    }
+
+    /**
+     * Recursively appends text from a node and its children to a StringBuilder.
+     *
+     * @param node the node to extract text from
+     * @param builder the StringBuilder to append text to
+     */
+    private void appendTextFromNode(Node node, StringBuilder builder) {
+        if (node == null) {
+            return;
+        }
+
+        // Append text content for Text nodes
+        if (node instanceof Text textNode) {
+            builder.append(textNode.getChars());
+        }
+
+        // Process children recursively
+        Node child = node.getFirstChild();
+        while (child != null) {
+            appendTextFromNode(child, builder);
+            child = child.getNext();
+        }
     }
 
     /**
