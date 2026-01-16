@@ -1,33 +1,43 @@
-TASK: Verify all test files in testFiles directory → No test artifacts outside testFiles directory
-ACTION: Verify that all test artifacts (.docx files) are located within the testFiles directory and no test output files exist outside of it. Update .gitignore if needed to ensure proper file placement.
-EXPECTED_OUTCOME: All .docx test artifacts are in testFiles/ directory; root MarkDownToWordSource/ has no test output files
+TASK: Run complete test suite → All tests pass with 100% content and format coverage
+
+ACTION: Verify all tests pass and add comprehensive content/format coverage tests for ALL Markdown elements specified in SPECIFICATION.md
+
+EXPECTED_OUTCOME: All tests pass, and coverage tests verify 100% of Markdown elements (H1-H6, paragraphs, bold, italic, bold-italic, links, inline code, code blocks, unordered lists, ordered lists, nested lists, tables) are correctly converted to equivalent Word formatting
 
 EXISTING_CODE:
-- .gitignore already ignores *.docx globally
-- testFiles/ contains test.md, test-formats.md, test-tables.md (input files)
-- testFiles/ contains test.docx, test-output.docx (output files)
-- root MarkDownToWordSource/ contains test-output.docx (outside testFiles - should be cleaned)
+- MarkDownToWordSource/src/test/java/com/markdowntoword/IntegrationTest.java - Contains content and format verification tests
+- MarkDownToWordSource/src/test/java/com/markdowntoword/util/TextContentExtractor.java - Content extraction utilities
+- MarkDownToWordSource/src/test/java/com/markdowntoword/util/FormatVerifier.java - Format verification utilities
 
 PATTERNS:
-- Test directory structure follows specification in specs/SPECIFICATION.md section 5
-- .gitignore pattern matching for file exclusions
+- Use TextContentExtractor.extractFromMarkdown() and TextContentExtractor.extractFromWord() for content verification
+- Use FormatVerifier methods (countHeadingStyle, countBoldRuns, countItalicRuns, etc.) for format verification
+- Follow existing test pattern in IntegrationTest: create Markdown, convert, verify
 
 PLAN:
-1. Verify current state of .docx files in MarkDownToWordSource directory tree
-2. Remove test-output.docx from root MarkDownToWordSource/ if it exists (cleanup stray test artifact)
-3. Verify .gitignore properly handles test artifacts:
-   - Keep *.docx global ignore for test outputs
-   - Consider adding specific exceptions for tracked test inputs if needed
-4. Run verification: find . -name "*.docx" -not -path "*/target/*" to confirm no artifacts outside testFiles
-5. Document final file structure verification in .task
+1. Run existing test suite to confirm all 309 tests pass
+2. Analyze coverage gaps - check which Markdown elements from SPECIFICATION.md are NOT explicitly tested for format verification
+3. Add comprehensive format coverage test that verifies ALL Markdown elements in one test document
+4. Add 100% coverage verification test that explicitly checks each element type exists with correct formatting
+5. Re-run test suite to confirm all tests pass including new coverage tests
 
 FILES_TO_CREATE: []
-FILES_TO_MODIFY: [root .gitignore to potentially add testFiles exception]
-TEST_COMMAND: find . -name "*.docx" -not -path "*/target/*" -not -path "*/testFiles/*" -not -path "*/.git/*"
+FILES_TO_MODIFY:
+- MarkDownToWordSource/src/test/java/com/markdowntoword/IntegrationTest.java (Add comprehensive coverage tests)
+
+TEST_COMMAND: cd MarkDownToWordSource && mvn test
 
 OUTCOME_VERIFICATION:
-- find . -name "*.docx" -not -path "*/target/*" -not -path "*/testFiles/*" returns empty (no test artifacts outside testFiles)
-- ls -la testFiles/ shows test.docx, test-output.docx are properly placed
-- root MarkDownToWordSource/ has no .docx files other than in testFiles/
-
-COMPLETED: Removed test-output.docx from root MarkDownToWordSource/ directory. All .docx test artifacts are now properly located in testFiles/ directory. The .gitignore *.docx pattern correctly prevents tracking of test output files.
+- `mvn test` shows "Tests run: XXX, Failures: 0, Errors: 0, Skipped: 0"
+- New test "testFormatVerification_CompleteCoverage_100Percent" verifies:
+  - H1 through H6 headings each exist with correct HeadingX style
+  - Bold formatting exists (countBoldRuns > 0)
+  - Italic formatting exists (countItalicRuns > 0)
+  - Bold+Italic formatting exists
+  - Hyperlinks exist (countHyperlinks >= 1)
+  - Inline code has monospace font (countMonospaceRuns > 0)
+  - Code blocks exist with monospace + shading (countCodeBlocks > 0)
+  - Unordered list formatting exists (countBulletListParagraphs > 0)
+  - Ordered list formatting exists (countOrderedListParagraphs > 0)
+  - Tables exist (countTables >= 1)
+- Content verification test passes (containsAllContent returns true for all test files)
