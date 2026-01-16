@@ -33,6 +33,7 @@ public class Main {
             performConversion(inputFile, outputFile);
 
             System.out.println("Conversion successful. Output file: " + outputFile);
+            printJarLocation();
             System.exit(0);
         } catch (IllegalArgumentException | MarkdownParseException | ConversionException e) {
             System.err.println("Error: " + e.getMessage());
@@ -119,6 +120,21 @@ public class Main {
         }
 
         return inputPath.resolveSibling(outputFileName).toString();
+    }
+
+    /**
+     * Prints the full absolute path to the JAR file containing this class.
+     * This helps users identify the location of the tool.
+     */
+    private static void printJarLocation() {
+        try {
+            String jarLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String absolutePath = Paths.get(jarLocation).toAbsolutePath().toString();
+            System.out.println("Tool location: " + absolutePath);
+        } catch (Exception e) {
+            // If we can't determine the JAR location, skip this output
+            // This can happen when running from an IDE or in certain test environments
+        }
     }
 
     /**
