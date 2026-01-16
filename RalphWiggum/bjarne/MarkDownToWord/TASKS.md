@@ -36,8 +36,8 @@
 
 ## Test Suite
 
-- [ ] Create test Markdown files in testFiles directory → test.md, test-formats.md, test-tables.md files exist
-- [ ] Create unit tests for MarkdownParser → Tests pass for parsing various Markdown elements
+- [x] Create test Markdown files in testFiles directory → test.md, test-formats.md, test-tables.md files exist
+- [x] Create unit tests for MarkdownParser → Tests pass for parsing various Markdown elements → Note: 36 tests covering constructor, parse(), parseFile()
 - [x] Create unit tests for WordDocumentBuilder → Tests pass for document creation
 - [ ] Create integration tests for full conversion → Tests pass converting sample Markdown to Word
 - [ ] Add content verification test → Validates converted Word contains all original content
