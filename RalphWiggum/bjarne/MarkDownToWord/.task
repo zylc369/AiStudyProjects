@@ -1,48 +1,33 @@
-TASK: Add content verification test → Validates converted Word contains all original content
-ACTION: Implement a content verification test that extracts all text content from both the original Markdown and the converted Word document, then compares them to ensure no content is lost
-EXPECTED_OUTCOME: Test passes, confirming that all text content from the original Markdown is present in the converted Word document
+TASK: Verify all test files in testFiles directory → No test artifacts outside testFiles directory
+ACTION: Verify that all test artifacts (.docx files) are located within the testFiles directory and no test output files exist outside of it. Update .gitignore if needed to ensure proper file placement.
+EXPECTED_OUTCOME: All .docx test artifacts are in testFiles/ directory; root MarkDownToWordSource/ has no test output files
 
 EXISTING_CODE:
-- IntegrationTest.java (src/test/java/com/markdowntoword/IntegrationTest.java) - Has performConversion() helper and basic verification
-- ParagraphConverter.java - Contains getTextFromNode() and appendTextFromNode() methods for extracting text from Flexmark AST
-- test.md, test-formats.md, test-tables.md - Test Markdown files in testFiles directory
-- Apache POI XWPFDocument API - getParagraphs(), getTables(), getText() methods
-- Flexmark AST API - Document, Node, Text classes
+- .gitignore already ignores *.docx globally
+- testFiles/ contains test.md, test-formats.md, test-tables.md (input files)
+- testFiles/ contains test.docx, test-output.docx (output files)
+- root MarkDownToWordSource/ contains test-output.docx (outside testFiles - should be cleaned)
 
 PATTERNS:
-- Use @TempDir for test file isolation
-- Use @AfterEach for cleanup (deleteIfExists helper pattern)
-- Use recursive text extraction (see ParagraphConverter.getTextFromNode())
-- Use try-with-resources for file I/O
-- Use assertTrue/assertEquals for assertions
-- Helper methods: findTestFile(), performConversion(), verifyWordDocumentHasContent()
+- Test directory structure follows specification in specs/SPECIFICATION.md section 5
+- .gitignore pattern matching for file exclusions
 
 PLAN:
-1. Create TextContentExtractor utility class that:
-   a. Extracts all text from a Flexmark AST Document (reusing getTextFromNode pattern from ParagraphConverter)
-   b. Extracts all text from an XWPFDocument (paragraphs + table cells)
-   c. Normalizes text (trim, collapse whitespace)
+1. Verify current state of .docx files in MarkDownToWordSource directory tree
+2. Remove test-output.docx from root MarkDownToWordSource/ if it exists (cleanup stray test artifact)
+3. Verify .gitignore properly handles test artifacts:
+   - Keep *.docx global ignore for test outputs
+   - Consider adding specific exceptions for tracked test inputs if needed
+4. Run verification: find . -name "*.docx" -not -path "*/target/*" to confirm no artifacts outside testFiles
+5. Document final file structure verification in .task
 
-2. Add a new test method to IntegrationTest.java: testContentVerification_WithTestMarkdown_ContainsAllOriginalText()
-
-3. In the test:
-   a. Read test.md content
-   b. Perform conversion using existing performConversion()
-   c. Extract text from original Markdown using TextContentExtractor.extractFromMarkdown()
-   d. Open converted Word file and extract text using TextContentExtractor.extractFromWord()
-   e. Assert that all original text content is present in the Word document
-
-4. Handle the challenge that converters create multiple paragraphs - use content presence check rather than exact match
-
-FILES_TO_CREATE:
-- src/test/java/com/markdowntoword/util/TextContentExtractor.java
-
-FILES_TO_MODIFY:
-- src/test/java/com/markdowntoword/IntegrationTest.java
-
-TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=IntegrationTest#testContentVerification_WithTestMarkdown_ContainsAllOriginalText > /tmp/bjarne-90941_1768579323/content-test.log 2>&1; echo "Exit code: $?"
+FILES_TO_CREATE: []
+FILES_TO_MODIFY: [root .gitignore to potentially add testFiles exception]
+TEST_COMMAND: find . -name "*.docx" -not -path "*/target/*" -not -path "*/testFiles/*" -not -path "*/.git/*"
 
 OUTCOME_VERIFICATION:
-- Check test passes: grep -i "Tests run:" /tmp/bjarne-90941_1768579323/content-test.log | head -5
-- Verify no failures: grep -i "failures\|errors" /tmp/bjarne-90941_1768579323/content-test.log
-- Run all tests: cd MarkDownToWordSource && mvn test > /tmp/bjarne-90941_1768579323/full-test.log 2>&1; echo "Exit code: $?"
+- find . -name "*.docx" -not -path "*/target/*" -not -path "*/testFiles/*" returns empty (no test artifacts outside testFiles)
+- ls -la testFiles/ shows test.docx, test-output.docx are properly placed
+- root MarkDownToWordSource/ has no .docx files other than in testFiles/
+
+COMPLETED: Removed test-output.docx from root MarkDownToWordSource/ directory. All .docx test artifacts are now properly located in testFiles/ directory. The .gitignore *.docx pattern correctly prevents tracking of test output files.
