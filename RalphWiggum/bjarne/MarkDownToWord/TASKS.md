@@ -13,9 +13,9 @@
 - [x] Create WordDocumentBuilder class → Can create and write .docx files with basic content
 - [x] Implement heading conversion → Note: Used Flexmark's NodeVisitor pattern for AST traversal
 - [x] Implement paragraph conversion → Note: Flexmark treats consecutive lines as single paragraph; blank lines separate paragraphs
-- [ ] Implement bold formatting → Markdown **text** converts to Word bold text
-- [ ] Implement italic formatting → Markdown *text* converts to Word italic text
-- [ ] Implement bold-italic combination → Markdown ***text*** converts to Word bold+italic text
+- [x] Implement bold formatting → Note: Flexmark AST structure has StrongEmphasis as child of Paragraph
+- [x] Implement italic formatting → Note: Flexmark AST structure has Emphasis as child of Paragraph
+- [x] Implement bold-italic combination → Note: Add BoldItalicText method for direct bold+italic formatting
 
 ## Advanced Formatting
 
