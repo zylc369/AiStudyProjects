@@ -1,58 +1,71 @@
-TASK: Implement ordered list conversion → Markdown 1. item converts to Word numbered list
-
-ACTION: Create OrderedListConverter class that converts Flexmark OrderedList AST nodes to Word numbered paragraphs using Apache POI's XWPFNumbering with decimal number format (1, 2, 3, ...)
-
-EXPECTED_OUTCOME: OrderedListConverter converts Markdown ordered lists (1., 2., 3., etc.) to Word numbered lists with proper numbering format
+TASK: Create Main class with CLI interface → Can run with java -jar <input.md> <output.docx> arguments
+ACTION: Create Main.java entry point class that accepts CLI arguments and orchestrates the Markdown to Word conversion
+EXPECTED_OUTCOME: User can run `java -jar MarkDownToWord-1.0.jar <input.md> <output.docx>` and it successfully converts Markdown to Word
 
 EXISTING_CODE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/UnorderedListConverter.java - Pattern for list conversion with XWPFNumbering
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/WordDocumentBuilder.java - Base document builder pattern
+- MarkdownParser.java: parseFile(String filePath) method to read and parse Markdown files
+- WordDocumentBuilder.java: constructor to create document, save(String filePath) to write output
+- HeadingConverter.java: convertDocument(Document) for headings
+- ParagraphConverter.java: convertDocument(Document) for paragraphs
+- CodeBlockConverter.java: convertDocument(Document) for code blocks
+- TableConverter.java: convertDocument(Document) for tables
+- UnorderedListConverter.java: convertDocument(Document) for bullet lists
+- OrderedListConverter.java: convertDocument(Document) for numbered lists
+- NestedListConverter.java: convertDocument(Document) for nested lists
+- LinkConverter.java: convertDocument(Document) for links
+- InlineCodeConverter.java: convertDocument(Document) for inline code
+- TextFormatterConverter.java: convertDocument(Document) for bold/italic
+- ConversionException.java: thrown during document saving errors
+- MarkdownParseException.java: thrown during file reading/parsing errors
+- pom.xml: already configured with maven-shade-plugin, mainClass set to com.markdowntoword.Main
 
 PATTERNS:
-- Follow UnorderedListConverter class structure: constructor with XWPFDocument, ensureNumberingDefinition(), convert methods
-- Use Flexmark NodeVisitor pattern for AST traversal (VisitHandler)
-- Use Apache POI's XWPFNumbering with CTAbstractNum for numbering definition
-- Set STNumberFormat.DECIMAL for numbered list format
-- Set paragraph.setNumID() for numbering
-- Follow test pattern from UnorderedListConverterTest for unit tests
-- Use @TempDir for test file handling
-- Use assertNotNull/assertThrows for validation tests
+- Use IllegalArgumentException for null/blank validation with descriptive messages
+- Use MarkdownParseException for file I/O/parsing errors
+- Use ConversionException for Word document generation errors
+- Follow existing JavaDoc comment style with @param, @throws tags
+- Print errors to stderr for exception messages
+- Return exit code 0 for success, 1 for failure (per SPECIFICATION.md)
 
 PLAN:
-1. Create OrderedListConverter class in MarkDownToWordSource/src/main/java/com/markdowntoword/converter/
-   - Constructor accepting XWPFDocument, throwing IllegalArgumentException for null
-   - ensureNumberingDefinition() method creating decimal numbering (STNumberFormat.DECIMAL)
-   - addOrderedListItem(String text) method for adding single numbered item
-   - convertOrderedList(OrderedList list) method for Flexmark AST conversion
-   - convertDocument(Document) method using NodeVisitor pattern
-   - getTextFromNode(Node) helper for text extraction
-   - appendTextFromNode(Node, StringBuilder) recursive helper
-   - protected getDocument() accessor
-
-2. Create OrderedListConverterTest class in MarkDownToWordSource/src/test/java/com/markdowntoword/converter/
-   - Constructor tests (valid, null)
-   - addOrderedListItem tests (valid text, empty text, special characters, unicode, null, long text, multiple items)
-   - convertOrderedList tests (simple list, null, single item, empty list)
-   - convertDocument tests (multiple lists, no lists, null, mixed content)
-   - Persistence test (saved document reopened, numbering persists)
-   - Numbering verification tests (numId is set correctly)
+1. Create Main.java in com.markdowntoword package (not in main/ subdirectory)
+2. Implement main(String[] args) method with argument parsing:
+   - args[0]: input.md file path (required)
+   - args[1]: output.docx file path (optional, defaults to input filename with .docx extension)
+3. Add input file validation:
+   - Check if argument is provided
+   - Validate file exists and is readable
+4. Generate output file path if not provided:
+   - Extract filename from input path
+   - Replace .md extension with .docx
+5. Instantiate MarkdownParser and parse the input file
+6. Instantiate WordDocumentBuilder and apply all converters in sequence:
+   - HeadingConverter
+   - ParagraphConverter
+   - CodeBlockConverter
+   - TableConverter
+   - UnorderedListConverter
+   - OrderedListConverter
+   - NestedListConverter
+   - LinkConverter
+   - InlineCodeConverter
+   - TextFormatterConverter
+7. Save the document to the output file
+8. Handle exceptions with appropriate error messages to stderr and exit code 1
+9. Print success message with output file path
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdowntoword/converter/OrderedListConverter.java
-- MarkDownToWordSource/src/test/java/com/markdowntoword/converter/OrderedListConverterTest.java
+- MarkDownToWordSource/src/main/java/com/markdowntoword/Main.java
 
-FILES_TO_MODIFY: None
+FILES_TO_MODIFY: (none)
 
-TEST_COMMAND: cd MarkDownToWordSource && mvn test -Dtest=OrderedListConverterTest
+TEST_COMMAND:
+cd MarkDownToWordSource && mvn clean package > /tmp/bjarne-90941_1768579323/package.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- Run mvn test -Dtest=OrderedListConverterTest - All tests pass
-- Verify Word document has numbered paragraphs with numID set
-- Verify numbering format is decimal (1, 2, 3, ...)
-- Verify test coverage for ordered list conversion
+- Build succeeds: grep -q "BUILD SUCCESS" /tmp/bjarne-90941_1768579323/package.log
+- JAR file exists: test -f MarkDownToWordSource/target/MarkDownToWord-1.0.jar
+- Main-Class is set: grep -q "Main-Class: com.markdowntoword.Main" MarkDownToWordSource/target/MarkDownToWord-1.0.jar 2>/dev/null || jar -tf MarkDownToWordSource/target/MarkDownToWord-1.0.jar | grep -q "META-INF/MANIFEST.MF"
+- Test conversion: create a sample .md file and run `java -jar target/MarkDownToWord-1.0.jar test.md test.docx` - verify .docx is created
 
-NOTE: 🟡 ISSUE: This task requires tests to be created. The OrderedListConverterTest must verify:
-- Numbering ID is set on paragraphs
-- Decimal number format is used
-- Content is preserved correctly
-- Numbering persists after save/reopen
+**NOTE: Tests for Main.java will be added in a future task (line 41 in TASKS.md: Create unit tests for MarkdownParser)**

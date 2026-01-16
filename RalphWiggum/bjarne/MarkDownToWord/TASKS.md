@@ -25,14 +25,14 @@
 - [x] Implement unordered list conversion → Note: Used XWPFNumbering with numID for bullet formatting
 - [x] Implement ordered list conversion → Note: Used XWPFNumbering with numId=2 for decimal formatting
 - [x] Implement nested list conversion → Note: Uses CTAbstractNum with 4 levels, ilvl set via CTNumPr for indentation
-- [ ] Implement table conversion → Markdown | col1 | col2 | converts to Word table
+- [x] Implement table conversion → Markdown | col1 | col2 | converts to Word table
 
 ## Main Application
 
-- [ ] Create Main class with CLI interface → Can run with `java -jar <input.md> <output.docx>` arguments
-- [ ] Add input file validation → Validates input file exists and is readable
-- [ ] Add output file handling → Creates output directory if needed, handles file overwrites
-- [ ] Add progress/status output → Prints conversion progress to console
+- [x] Create Main class with CLI interface → Can run with `java -jar <input.md> <output.docx>` arguments
+- [x] Add input file validation → Validates input file exists and is readable
+- [x] Add output file handling → Creates output directory if needed, handles file overwrites
+- [x] Add progress/status output → Prints conversion progress to console
 
 ## Test Suite
 

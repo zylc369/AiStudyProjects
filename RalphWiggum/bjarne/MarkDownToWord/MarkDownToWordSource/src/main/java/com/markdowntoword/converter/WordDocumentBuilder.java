@@ -74,7 +74,7 @@ public class WordDocumentBuilder {
      *
      * @return the XWPFDocument instance
      */
-    protected XWPFDocument getDocument() {
+    public XWPFDocument getDocument() {
         return document;
     }
 }
