@@ -10,7 +10,7 @@
 ## Core Conversion Engine
 
 - [x] Create MarkdownParser class → Note: Flexmark parser doesn't need NodeExtensionList for default behavior
-- [ ] Create WordDocumentBuilder class → Can create and write .docx files with basic content
+- [x] Create WordDocumentBuilder class → Can create and write .docx files with basic content
 - [ ] Implement heading conversion → Markdown headings (# ## ###) convert to Word paragraphs with appropriate styles
 - [ ] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
 - [ ] Implement bold formatting → Markdown **text** converts to Word bold text
@@ -38,7 +38,7 @@
 
 - [ ] Create test Markdown files in testFiles directory → test.md, test-formats.md, test-tables.md files exist
 - [ ] Create unit tests for MarkdownParser → Tests pass for parsing various Markdown elements
-- [ ] Create unit tests for WordDocumentBuilder → Tests pass for document creation
+- [x] Create unit tests for WordDocumentBuilder → Tests pass for document creation
 - [ ] Create integration tests for full conversion → Tests pass converting sample Markdown to Word
 - [ ] Add content verification test → Validates converted Word contains all original content
 - [ ] Add format verification test → Validates converted Word has equivalent formatting
