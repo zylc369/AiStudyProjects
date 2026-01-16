@@ -24,7 +24,7 @@
 - [x] Implement code block conversion → Note: Uses Courier New font with spacing for visual separation
 - [x] Implement unordered list conversion → Note: Used XWPFNumbering with numID for bullet formatting
 - [x] Implement ordered list conversion → Note: Used XWPFNumbering with numId=2 for decimal formatting
-- [ ] Implement nested list conversion → Markdown nested lists convert to Word nested lists
+- [x] Implement nested list conversion → Note: Uses CTAbstractNum with 4 levels, ilvl set via CTNumPr for indentation
 - [ ] Implement table conversion → Markdown | col1 | col2 | converts to Word table
 
 ## Main Application
