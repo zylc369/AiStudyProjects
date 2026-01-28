@@ -1,6 +1,7 @@
 package com.markdown.toword;
 
 import com.markdown.toword.model.ConversionException;
+import com.markdown.toword.parser.MarkdownParser;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -19,6 +20,15 @@ import java.nio.file.Paths;
  */
 public class MarkdownConverter {
 
+    private final MarkdownParser parser;
+
+    /**
+     * Creates a new MarkdownConverter with a default parser.
+     */
+    public MarkdownConverter() {
+        this.parser = new MarkdownParser();
+    }
+
     /**
      * Converts a Markdown string to a Word document.
      *
@@ -35,8 +45,9 @@ public class MarkdownConverter {
         }
 
         try (XWPFDocument document = new XWPFDocument()) {
-            // For now, create a simple document with the markdown content as plain text
-            // Full parsing will be implemented in subsequent tasks
+            // Parse markdown into AST
+            // Full conversion will be implemented in subsequent tasks
+            parser.parse(markdownContent);
             XWPFParagraph paragraph = document.createParagraph();
             XWPFRun run = paragraph.createRun();
             run.setText(markdownContent);

@@ -1,2 +1,3 @@
 com/markdown/toword/MarkdownConverter.class
 com/markdown/toword/model/ConversionException.class
+com/markdown/toword/parser/MarkdownParser.class

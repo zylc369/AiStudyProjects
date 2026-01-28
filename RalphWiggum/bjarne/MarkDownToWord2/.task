@@ -1,39 +1,38 @@
-TASK: Create main MarkdownConverter class → MarkdownConverter.java exists with convert(String markdown, String outputPath) method
-ACTION: Create the main MarkdownConverter class with the core convert method and supporting infrastructure (exception class, basic structure)
-EXPECTED_OUTCOME: MarkdownConverter.java exists with convert(String markdownContent, String outputPath) method
+TASK: Implement Markdown parser using flexmark → Can parse Markdown into AST nodes
+ACTION: Create MarkdownParser class that uses flexmark to parse Markdown content into an AST for processing
+EXPECTED_OUTCOME: MarkdownParser.java exists that can parse Markdown strings into flexmark AST nodes
 
 EXISTING_CODE:
-- No Java source files exist yet
-- pom.xml configured with Apache POI and flexmark dependencies
-- Package structure: com.markdown.toword
+- MarkdownConverter.java with convert() method (currently writes plain text as placeholder)
+- pom.xml has flexmark-all dependency (version 0.64.8)
+- model/ConversionException.java exists
 
 PATTERNS:
-- Follow Java naming conventions (PascalCase for classes)
-- Package structure matches project layout: com.markdown.toword
-- Use Apache POI XWPFDocument for Word document creation
-- Use flexmark for Markdown parsing (per dependencies)
-- Custom exception for conversion errors (per API.md spec)
+- Package structure: com.markdown.toword.parser
+- Use flexmark-all library for Markdown parsing
+- Parser returns AST nodes for visitor-style processing
+- Follow Java naming conventions
 
 PLAN:
-1. Create ConversionException class in model subpackage
-2. Create MarkdownConverter class with convert(String markdownContent, String outputPath) method
-3. Add convertFile(String markdownFilePath, String outputPath) method as per API spec
-4. Set up basic class structure with proper package declarations
-5. Add Javadoc comments for public API methods
+1. Create parser subpackage directory
+2. Create MarkdownParser class with parse(String markdown) method
+3. Use flexmark Parser and Document classes for AST parsing
+4. Add method to get AST root node for visitor pattern
+5. Update MarkdownConverter to use the parser (placeholder integration)
+6. Add Javadoc comments
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdown/toword/model/ConversionException.java
-- MarkDownToWordSource/src/main/java/com/markdown/toword/MarkdownConverter.java
+- MarkDownToWordSource/src/main/java/com/markdown/toword/parser/MarkdownParser.java
 
 FILES_TO_MODIFY:
-- None
+- MarkDownToWordSource/src/main/java/com/markdown/toword/MarkdownConverter.java (integrate parser)
 
 TEST_COMMAND:
 cd MarkDownToWordSource && mvn compile > /tmp/bjarne-41779_1769607465/compile.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- Verify MarkdownConverter.java exists at src/main/java/com/markdown/toword/MarkdownConverter.java
-- Verify class has convert(String markdownContent, String outputPath) method
-- Verify class has convertFile(String markdownFilePath, String outputPath) method
-- Verify ConversionException.java exists in model subpackage
+- Verify MarkdownParser.java exists in parser subpackage
+- Verify class has parse(String markdown) method returning flexmark Document
+- Verify class uses flexmark Parser.builder() for parsing
+- Verify MarkdownConverter imports and uses MarkdownParser
 - Verify mvn compile completes successfully
