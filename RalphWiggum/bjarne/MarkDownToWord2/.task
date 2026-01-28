@@ -1,38 +1,39 @@
-TASK: Implement Markdown parser using flexmark → Can parse Markdown into AST nodes
-ACTION: Create MarkdownParser class that uses flexmark to parse Markdown content into an AST for processing
-EXPECTED_OUTCOME: MarkdownParser.java exists that can parse Markdown strings into flexmark AST nodes
+TASK: Implement header conversion (h1-h6) → Markdown # Headers convert to Word headings with proper styles
+ACTION: Create converter component to handle Markdown header elements and convert them to Word heading styles
+EXPECTED_OUTCOME: Markdown headers (# H1 through ###### H6) are converted to Word paragraphs with Heading1-Heading6 styles
 
 EXISTING_CODE:
-- MarkdownConverter.java with convert() method (currently writes plain text as placeholder)
-- pom.xml has flexmark-all dependency (version 0.64.8)
+- MarkdownConverter.java creates XWPFDocument and calls parser.parse()
+- MarkdownParser.java returns flexmark AST Document
 - model/ConversionException.java exists
+- Apache POI XWPFDocument, XWPFParagraph available
 
 PATTERNS:
-- Package structure: com.markdown.toword.parser
-- Use flexmark-all library for Markdown parsing
-- Parser returns AST nodes for visitor-style processing
-- Follow Java naming conventions
+- Package structure: com.markdown.toword.converter
+- Use flexmark AST visitor pattern to traverse nodes
+- Use Apache POI setStyle("Heading1" through "Heading6") for headers
+- Follow single responsibility principle - separate converter for each element type
 
 PLAN:
-1. Create parser subpackage directory
-2. Create MarkdownParser class with parse(String markdown) method
-3. Use flexmark Parser and Document classes for AST parsing
-4. Add method to get AST root node for visitor pattern
-5. Update MarkdownConverter to use the parser (placeholder integration)
-6. Add Javadoc comments
+1. Create converter subpackage directory
+2. Create HeaderConverter class with method to convert flexmark Heading nodes to Word
+3. Use flexmark visitor pattern to visit Heading nodes in AST
+4. For each Heading node, create XWPFParagraph with appropriate style
+5. Set style based on heading level (1-6 maps to Heading1-Heading6)
+6. Add heading text content to paragraph
+7. Integrate into MarkdownConverter.convert() method
 
 FILES_TO_CREATE:
-- MarkDownToWordSource/src/main/java/com/markdown/toword/parser/MarkdownParser.java
+- MarkDownToWordSource/src/main/java/com/markdown/toword/converter/HeaderConverter.java
 
 FILES_TO_MODIFY:
-- MarkDownToWordSource/src/main/java/com/markdown/toword/MarkdownConverter.java (integrate parser)
+- MarkDownToWordSource/src/main/java/com/markdown/toword/MarkdownConverter.java (use HeaderConverter)
 
 TEST_COMMAND:
 cd MarkDownToWordSource && mvn compile > /tmp/bjarne-41779_1769607465/compile.log 2>&1; echo "Exit code: $?"
 
 OUTCOME_VERIFICATION:
-- Verify MarkdownParser.java exists in parser subpackage
-- Verify class has parse(String markdown) method returning flexmark Document
-- Verify class uses flexmark Parser.builder() for parsing
-- Verify MarkdownConverter imports and uses MarkdownParser
+- Verify HeaderConverter.java exists in converter subpackage
+- Verify converter handles Heading nodes from flexmark AST
+- Verify Word document paragraphs get "Heading1" through "Heading6" styles
 - Verify mvn compile completes successfully

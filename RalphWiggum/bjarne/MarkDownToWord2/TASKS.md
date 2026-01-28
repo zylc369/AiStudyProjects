@@ -8,8 +8,8 @@
 ## Core Converter Implementation
 - [x] Create main MarkdownConverter class → MarkdownConverter.java exists with convert(String markdown, String outputPath) method
 - [x] Implement Markdown parser using flexmark → Can parse Markdown into AST nodes
-- [ ] Implement Word document initializer → Creates empty .docx file with Apache POI
-- [ ] Implement header conversion (h1-h6) → Markdown # Headers convert to Word headings with proper styles
+- [x] Implement Word document initializer → Creates empty .docx file with Apache POI
+- [x] Implement header conversion (h1-h6) → Markdown # Headers convert to Word headings with proper styles
 - [ ] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
 - [ ] Implement bold text conversion → Markdown **bold** converts to Word bold formatting
 - [ ] Implement italic text conversion → Markdown *italic* converts to Word italic formatting

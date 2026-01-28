@@ -1,5 +1,6 @@
 package com.markdown.toword;
 
+import com.markdown.toword.converter.HeaderConverter;
 import com.markdown.toword.model.ConversionException;
 import com.markdown.toword.parser.MarkdownParser;
 
@@ -21,12 +22,14 @@ import java.nio.file.Paths;
 public class MarkdownConverter {
 
     private final MarkdownParser parser;
+    private final HeaderConverter headerConverter;
 
     /**
      * Creates a new MarkdownConverter with a default parser.
      */
     public MarkdownConverter() {
         this.parser = new MarkdownParser();
+        this.headerConverter = new HeaderConverter();
     }
 
     /**
@@ -46,11 +49,10 @@ public class MarkdownConverter {
 
         try (XWPFDocument document = new XWPFDocument()) {
             // Parse markdown into AST
-            // Full conversion will be implemented in subsequent tasks
-            parser.parse(markdownContent);
-            XWPFParagraph paragraph = document.createParagraph();
-            XWPFRun run = paragraph.createRun();
-            run.setText(markdownContent);
+            var astDocument = parser.parse(markdownContent);
+
+            // Convert headers
+            headerConverter.convertHeaders(document, astDocument);
 
             // Ensure output directory exists
             Path outputFile = Paths.get(outputPath);
