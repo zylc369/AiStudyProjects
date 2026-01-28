@@ -6,7 +6,7 @@
 - [x] Configure Maven for Java 17 → pom.xml includes maven-compiler-plugin with source/target 17
 
 ## Core Converter Implementation
-- [ ] Create main MarkdownConverter class → MarkdownConverter.java exists with convert(String markdown, String outputPath) method
+- [x] Create main MarkdownConverter class → MarkdownConverter.java exists with convert(String markdown, String outputPath) method
 - [ ] Implement Markdown parser using flexmark → Can parse Markdown into AST nodes
 - [ ] Implement Word document initializer → Creates empty .docx file with Apache POI
 - [ ] Implement header conversion (h1-h6) → Markdown # Headers convert to Word headings with proper styles
