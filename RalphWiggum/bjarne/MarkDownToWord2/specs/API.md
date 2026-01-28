@@ -1,99 +1,83 @@
-# API Specification
+# Core Converter API Specification
 
-## Main Converter Class
+## Main API: MarkdownConverter
 
-### Package: `com.markdowntoword`
-
-### MarkdownToWordConverter
+### Public Interface
 
 ```java
-public class MarkdownToWordConverter {
+package com.markdown.toword;
+
+public class MarkdownConverter {
+
+    /**
+     * Converts a Markdown string to a Word document
+     *
+     * @param markdownContent The Markdown content as a string
+     * @param outputPath The path where the .docx file will be created
+     * @throws ConversionException if conversion fails
+     */
+    public void convert(String markdownContent, String outputPath);
+
     /**
      * Converts a Markdown file to a Word document
      *
-     * @param markdownFilePath  Path to input Markdown file (.md)
-     * @param wordFilePath      Path to output Word document (.docx)
-     * @throws IOException      If file reading/writing fails
+     * @param markdownFilePath Path to the input .md file
+     * @param outputPath The path where the .docx file will be created
+     * @throws IOException if file operations fail
+     * @throws ConversionException if conversion fails
      */
-    public void convert(String markdownFilePath, String wordFilePath) throws IOException;
+    public void convertFile(String markdownFilePath, String outputPath);
 }
 ```
 
-## CLI Interface
+### CLI Entry Point
 
-### Main Class: `com.markdowntoword.Main`
+```java
+package com.markdown.toword;
 
-```
-Usage: java -jar markdown-to-word.jar <input.md> <output.docx>
-
-Arguments:
-  input.md      Path to the input Markdown file
-  output.docx   Path to the output Word document
-
-Options:
-  --help        Show help message
-
-Exit Codes:
-  0             Success
-  1             Error (file not found, invalid format, etc.)
+public class Main {
+    public static void main(String[] args) {
+        // Usage: java -jar markdown-to-word.jar <input.md> [output.docx]
+        // If output not specified, uses input filename with .docx extension
+    }
+}
 ```
 
-## Conversion Rules
+## Package Structure
 
-### Supported Markdown Elements
+```
+com.markdown.toword/
+├── MarkdownConverter.java       # Main converter class
+├── Main.java                    # CLI entry point
+├── model/
+│   ├── ConversionContext.java   # Holds conversion state
+│   └── ConversionException.java # Custom exception
+├── parser/
+│   └── MarkdownParser.java      # Parses Markdown to AST
+└── converter/
+    ├── HeaderConverter.java     # Converts headers
+    ├── TextConverter.java       # Converts paragraphs and text formatting
+    ├── ListConverter.java       # Converts lists
+    ├── TableConverter.java      # Converts tables
+    ├── CodeConverter.java       # Converts code blocks
+    ├── LinkConverter.java       # Converts links
+    └── ImageConverter.java      # Converts images
+```
 
-| Markdown | Word Format |
-|----------|-------------|
-| `# H1` | Heading 1 style (16pt bold) |
-| `## H2` | Heading 2 style (14pt bold) |
-| `### H3` | Heading 3 style (13pt bold) |
-| `#### H4` | Heading 4 style (12pt bold) |
-| `##### H5` | Heading 5 style (11pt bold) |
-| `###### H6` | Heading 6 style (10pt bold) |
-| `**bold**` | Bold font weight |
-| `*italic*` | Italic font style |
-| `***bolditalic***` | Bold + Italic |
-| `` `code` `` | Consolas/Courier font, 10pt |
-| `[text](url)` | Hyperlink |
-| `- item` | Bulleted list (bullet) |
-| `1. item` | Numbered list (decimal) |
-| `> quote` | Italic, left border |
-| `---` | Horizontal line |
-| `---` | Horizontal line |
-| `| table |` | Word table with borders |
-| `
-![alt](url)
-` | Embedded image |
-| ```language\ncode\n``` | Code block with monospace font and border |
+## Exception Handling
 
-### Code Block Handling
+```java
+package com.markdown.toword.model;
 
-Fenced code blocks (```) should be converted to:
-- Paragraph with "Code Block" style
-- Monospace font (Consolas or Courier New)
-- Light gray background (#F5F5F5)
-- Border around the block
-- Preserve whitespace and line breaks
+public class ConversionException extends Exception {
+    public ConversionException(String message);
+    public ConversionException(String message, Throwable cause);
+}
+```
 
-### Table Handling
+## Design Decisions
 
-Markdown tables convert to Word tables with:
-- Auto-fit column widths
-- Single border lines
-- Header row with bold text
-- Preserve cell alignment (left/center/right)
-
-## Error Handling
-
-### Input Validation
-- Input file must exist
-- Input file must have .md extension
-- Output file must have .docx extension
-- Output directory must be writable
-
-### Error Messages
-- `Error: Input file not found: <path>`
-- `Error: Invalid input file format. Expected .md file`
-- `Error: Cannot write to output location: <path>`
-- `Error: Failed to parse Markdown: <details>`
-- `Error: Failed to create Word document: <details>`
+1. **Streaming vs In-Memory**: Use in-memory processing for simplicity (Markdown files are typically small)
+2. **Error Handling**: Fail-fast on parsing errors, but attempt recovery for formatting issues
+3. **Thread Safety**: Converter instances are NOT thread-safe (create new instance per conversion)
+4. **Resource Management**: Use try-with-resources for all file operations

@@ -1,125 +1,145 @@
 # Test Specification
 
-## Test Structure
+## Test Infrastructure
 
+### Test Framework
+- **JUnit 5** (Jupiter) for test execution
+- **AssertJ** for fluent assertions
+- **JUnit Pioneer** for temporary file handling
+
+### Test Base Class
+```java
+abstract class MarkdownConverterTestBase {
+    protected MarkdownConverter converter;
+    protected Path tempDir;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        converter = new MarkdownConverter();
+        tempDir = Files.createTempDirectory("md-test-");
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        // Clean up temp files
+    }
+}
 ```
-src/test/resources/
-├── simple.md                 # Simple paragraph
-├── headings.md              # All heading levels
-├── formatting.md            # Bold, italic, code
-├── lists.md                 # Ordered and unordered
-├── nested-lists.md          # Nested lists
-├── tables.md                # Tables
-├── links.md                 # Links
-├── images.md                # Images
-├── code-blocks.md           # Code blocks
-├── blockquotes.md           # Blockquotes
-├── complex.md               # All features combined
-└── chinese.md               # Chinese content test
-```
 
-## Test Cases
+## Unit Tests
 
-### 1. Heading Conversion Test
-**File**: `headings.md`
+### Header Conversion Tests
+
+#### Test: ConvertH1Header
+**Input:**
 ```markdown
-# Heading 1
-## Heading 2
-### Heading 3
-#### Heading 4
-##### Heading 5
-###### Heading 6
+# Main Title
 ```
+**Expected:**
+- Output document has 1 paragraph
+- Paragraph style is "Heading1"
+- Text content is "Main Title"
 
-**Verification**:
-- Word document has 6 paragraphs
-- Each paragraph uses correct heading style (Heading 1-6)
-- Font sizes are 16pt, 14pt, 13pt, 12pt, 11pt, 10pt
-- All text is bold
-
-### 2. Text Formatting Test
-**File**: `formatting.md`
+#### Test: ConvertAllHeaderLevels
+**Input:**
 ```markdown
-This is **bold text**.
-This is *italic text*.
-This is ***bold and italic***.
-This is `inline code`.
-This is ~~strikethrough~~.
+# H1
+## H2
+### H3
+#### H4
+##### H5
+###### H6
 ```
+**Expected:**
+- 6 paragraphs created
+- Each has correct heading style (Heading1 through Heading6)
 
-**Verification**:
-- "bold text" has isBold = true
-- "italic text" has isItalic = true
-- "bold and italic" has both properties
-- "inline code" uses Consolas font
-- "strikethrough" has strikeThrough = true
+### Text Formatting Tests
 
-### 3. List Test
-**File**: `lists.md`
+#### Test: ConvertBoldText
+**Input:**
 ```markdown
-Unordered:
-- Item 1
-- Item 2
-- Item 3
+This is **bold** text.
+```
+**Expected:**
+- 1 paragraph with 3 runs
+- Run 1: "This is " (plain)
+- Run 2: "bold" (bold=true)
+- Run 3: " text." (plain)
 
-Ordered:
+#### Test: ConvertItalicText
+**Input:**
+```markdown
+This is *italic* text.
+```
+**Expected:**
+- Run 2 has italic=true
+
+#### Test: ConvertBoldAndItalic
+**Input:**
+```markdown
+This is ***bolditalic*** text.
+```
+**Expected:**
+- Run 2 has both bold=true and italic=true
+
+#### Test: ConvertStrikethrough
+**Input:**
+```markdown
+This is ~~deleted~~ text.
+```
+**Expected:**
+- Run 2 has strikeThrough=true
+
+#### Test: ConvertInlineCode
+**Input:**
+```markdown
+Use `System.out.println()` for output.
+```
+**Expected:**
+- Run 2 uses "Courier New" font family
+- Run 2 font size is 10pt
+
+### List Conversion Tests
+
+#### Test: ConvertUnorderedList
+**Input:**
+```markdown
+- Apple
+- Banana
+- Cherry
+```
+**Expected:**
+- 3 paragraphs with bullet numbering
+- Each paragraph indent level = 0
+
+#### Test: ConvertNestedUnorderedList
+**Input:**
+```markdown
+- Fruit
+  - Apple
+  - Banana
+- Vegetable
+```
+**Expected:**
+- 4 paragraphs total
+- "Apple" and "Banana" have indent level = 1
+
+#### Test: ConvertOrderedList
+**Input:**
+```markdown
 1. First
 2. Second
 3. Third
 ```
+**Expected:**
+- 3 paragraphs with decimal numbering
+- Numbering format is NUM_FMT.DECIMAL
 
-**Verification**:
-- Unordered list uses bullet numbering
-- Ordered list uses decimal numbering
-- Each list item is a separate paragraph
-- Lists are separated by paragraph
+### Code Block Tests
 
-### 4. Nested List Test
-**File**: `nested-lists.md`
-```markdown
-- Level 1
-  - Level 2
-    - Level 3
-- Another L1
-  - Another L2
-```
-
-**Verification**:
-- Three indentation levels detected
-- Level 2 has indent > Level 1
-- Level 3 has indent > Level 2
-- Different bullet styles for each level
-
-### 5. Table Test
-**File**: `tables.md`
-```markdown
-| Name | Age | City |
-|------|-----|------|
-| Alice | 25 | NYC |
-| Bob | 30 | LA |
-```
-
-**Verification**:
-- Word document contains 1 table
-- Table has 2 rows (header + 1 data)
-- Table has 3 columns
-- Header row has bold text
-- All cells have borders
-
-### 6. Link Test
-**File**: `links.md`
-```markdown
-[OpenAI](https://openai.com)
-<https://github.com>
-```
-
-**Verification**:
-- First hyperlink: text="OpenAI", URI="https://openai.com"
-- Second hyperlink: text="https://github.com", URI="https://github.com"
-- Hyperlinks are clickable
-
-### 7. Code Block Test
-**File**: `code-blocks.md`
+#### Test: ConvertFencedCodeBlock
+**Input:**
 ````markdown
 ```
 public class Hello {
@@ -129,120 +149,209 @@ public class Hello {
 }
 ```
 ````
-**Verification**:
-- Code block has monospace font
-- Background color is #F5F5F5
-- Border exists around code
-- Whitespace is preserved
+**Expected:**
+- 1 paragraph created
+- Font is "Courier New"
+- Font size is 9pt
+- Background color is RGB(245, 245, 245)
 
-### 8. Blockquote Test
-**File**: `blockquotes.md`
-```markdown
-> This is a quote
-> That spans multiple lines
+#### Test: PreserveCodeWhitespace
+**Input:**
+````markdown
 ```
+Line1
+  Line2  indented
+```
+````
+**Expected:**
+- Both leading and trailing spaces preserved in output
 
-**Verification**:
+### Table Conversion Tests
+
+#### Test: ConvertSimpleTable
+**Input:**
+```markdown
+| Name | Age |
+|------|-----|
+| John | 30  |
+```
+**Expected:**
+- Document contains 1 XWPFTable
+- Table has 2 rows and 2 columns
+- Header row has bold text
+- Header row has gray background (RGB 217, 217, 217)
+
+#### Test: ConvertTableWithAlignment
+**Input:**
+```markdown
+| Left | Center | Right |
+|:-----|:------:|------:|
+| A | B | C |
+```
+**Expected:**
+- Column 0: left aligned
+- Column 1: center aligned
+- Column 2: right aligned
+
+### Link Conversion Tests
+
+#### Test: ConvertBasicLink
+**Input:**
+```markdown
+[OpenAI](https://openai.com)
+```
+**Expected:**
+- 1 hyperlink run created
+- Display text is "OpenAI"
+- Hyperlink URL is "https://openai.com"
+
+### Image Conversion Tests
+
+#### Test: ConvertImageWithAbsolutePath
+**Input:**
+```markdown
+![Alt text](/path/to/image.png)
+```
+**Setup:**
+- Create test image at specified path
+
+**Expected:**
+- 1 picture run created
+- Picture description (alt text) is "Alt text"
+
+#### Test: ConvertImageWithRelativePath
+**Input:**
+```markdown
+![Alt text](./images/test.png)
+```
+**Setup:**
+- Convert file at `/tmp/test/input.md`
+- Create image at `/tmp/test/images/test.png`
+
+**Expected:**
+- Image resolved relative to markdown file location
+- Picture embedded successfully
+
+### Blockquote Tests
+
+#### Test: ConvertBlockquote
+**Input:**
+```markdown
+> This is a quote.
+```
+**Expected:**
+- 1 paragraph created
+- Left indentation = 720 twips (0.5 inch)
 - Text is italic
-- Left border exists
-- Left indent is 20pt
-- Color is gray
 
-### 9. Complex Document Test
-**File**: `complex.md`
-Contains all features combined.
+### Horizontal Rule Tests
 
-**Verification**:
-- All content from Markdown appears in Word
-- All formatting is correct
-- No content is lost
-- Document structure is preserved
-
-### 10. Chinese Content Test
-**File**: `chinese.md`
+#### Test: ConvertHorizontalRule
+**Input:**
 ```markdown
-# 中文标题
-这是一段**粗体**文字。
-这是一个*斜体*句子。
+Text above
+---
+Text below
 ```
+**Expected:**
+- 3 paragraphs
+- Middle paragraph has bottom border
 
-**Verification**:
-- Chinese characters display correctly
-- Formatting applies to Chinese text
-- No encoding issues
+## Integration Tests
 
-## Test Implementation
+### Test: ConvertComplexDocument
+**Input:**
+```markdown
+# Sample Document
 
-### Unit Tests
+This is a **test document** with *various* formatting.
+
+## Features
+
+- Bullet points
+- Numbered lists
+  - Nested items
+
+1. First item
+2. Second item
 
 ```java
-@Test
-public void testHeadingsConversion() throws IOException {
-    String input = "src/test/resources/headings.md";
-    String output = "target/test-output/headings.docx";
-
-    converter.convert(input, output);
-
-    // Verify output file exists
-    assertTrue(Files.exists(Paths.get(output)));
-
-    // Verify heading styles
-    XWPFDocument doc = new XWPFDocument(new FileInputStream(output));
-    // ... assertions
-}
-
-@Test
-public void testBoldFormatting() throws IOException {
-    String markdown = "This is **bold** text.";
-    // Convert and verify bold run
+public class Test {
+    // Code here
 }
 ```
 
-### Integration Test
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |
 
-```java
-@Test
-public void testComplexDocument() throws IOException {
-    String input = "src/test/resources/complex.md";
-    String output = "target/test-output/complex.docx";
+> A blockquote here
 
-    converter.convert(input, output);
+[A link](https://example.com)
 
-    // Verify file created
-    assertTrue(Files.exists(Paths.get(output)));
+---
 
-    // Verify content preservation
-    XWPFDocument doc = new XWPFDocument(new FileInputStream(output));
-    // Count elements and compare with source
-}
+End of document.
 ```
 
-## Automated Verification Criteria
+**Expected:**
+- All elements converted without errors
+- Output .docx file is valid and can be opened
+- Content count matches input (verify no content loss)
 
-### Success Criteria
-1. All unit tests pass (100%)
-2. Integration test passes
-3. No exceptions thrown during conversion
-4. Output file is valid .docx format
-5. Output file can be opened in Microsoft Word
+## Verification Tests
 
-### Content Verification
-For each test:
-1. Count of paragraphs matches or exceeds Markdown
-2. All text from Markdown appears in output
-3. Styles are applied correctly
-4. Hyperlinks are valid
-5. Tables have correct dimensions
-6. Lists have correct numbering
+### Test: ContentCompleteness
+**Purpose:** Verify no content is lost during conversion
+
+**Method:**
+1. Convert test Markdown
+2. Extract all text from output .docx
+3. Extract all text from input Markdown (excluding markup)
+4. Assert: Output text contains all input text (case-insensitive)
+
+### Test: OutputFileValidity
+**Purpose:** Verify output .docx can be opened
+
+**Method:**
+1. Convert test Markdown
+2. Open output with Apache POI (XWPFDocument)
+3. Assert: No exceptions thrown
+4. Assert: Document has at least 1 paragraph
+
+## Test Data
+
+### Test Files Location
+- `src/test/resources/markdown/` - Input .md files
+- `src/test/resources/images/` - Test images
+- `src/test/resources/expected/` - Expected output metadata
+
+### Test Markdown Files
+- `simple.md` - Basic formatting
+- `headers.md` - All header levels
+- `lists.md` - Various list types
+- `tables.md` - Table examples
+- `code.md` - Code blocks
+- `links.md` - Links and images
+- `complex.md` - Combined elements
+- `edge-cases.md` - Unusual scenarios
+
+## Test Execution
 
 ### Maven Commands
 ```bash
 # Run all tests
 mvn test
 
-# Run specific test
-mvn test -Dtest=HeadingConversionTest
+# Run specific test class
+mvn test -Dtest=MarkdownConverterTest
 
-# Generate test report
-mvn surefire-report:report
+# Run specific test method
+mvn test -Dtest=MarkdownConverterTest#testConvertBoldText
 ```
+
+### Test Coverage Goal
+- Minimum line coverage: 80%
+- Branch coverage: 70%
+- All public API methods tested
+- All markdown elements covered

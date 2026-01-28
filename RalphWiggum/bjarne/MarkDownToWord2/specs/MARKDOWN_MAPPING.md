@@ -1,158 +1,140 @@
 # Markdown to Word Format Mapping
 
-This document details how each Markdown element maps to Word formatting.
+## Header Elements
+
+| Markdown | Word Style | Notes |
+|----------|------------|-------|
+| `# H1` | Heading 1 | POI: setStyle("Heading1") |
+| `## H2` | Heading 2 | POI: setStyle("Heading2") |
+| `### H3` | Heading 3 | POI: setStyle("Heading3") |
+| `#### H4` | Heading 4 | POI: setStyle("Heading4") |
+| `##### H5` | Heading 5 | POI: setStyle("Heading5") |
+| `###### H6` | Heading 6 | POI: setStyle("Heading6") |
 
 ## Text Formatting
 
-### Headings
-
-| Markdown | Word Style | Font Size | Font Weight |
-|----------|------------|-----------|-------------|
-| `# Heading 1` | Heading 1 | 16pt | Bold |
-| `## Heading 2` | Heading 2 | 14pt | Bold |
-| `### Heading 3` | Heading 3 | 13pt | Bold |
-| `#### Heading 4` | Heading 4 | 12pt | Bold |
-| `##### Heading 5` | Heading 5 | 11pt | Bold |
-| `###### Heading 6` | Heading 6 | 10pt | Bold |
-
-### Character Styles
-
-| Markdown | Word Format | Implementation |
-|----------|-------------|----------------|
-| `**bold text**` | Bold | `XWPFRun.setBold(true)` |
-| `*italic text*` | Italic | `XWPFRun.setItalic(true)` |
-| `***bold italic***` | Bold + Italic | Both properties set |
-| `~~strikethrough~~` | Strikethrough | `XWPFRun.setStrikeThrough(true)` |
-| `` `inline code` `` | Monospace | Font: Consolas, Size: 10pt |
+| Markdown | Word Formatting | POI Implementation |
+|----------|-----------------|-------------------|
+| `**bold**` | Bold text | `setBold(true)` |
+| `*italic*` | Italic text | `setItalic(true)` |
+| `***bolditalic***` | Bold + Italic | Both properties set |
+| `~~strikethrough~~` | Strikethrough | `setStrikeThrough(true)` |
+| `` `inline code` `` | Monospace font | Font: Courier New, Size: 10 |
 
 ## Structural Elements
 
 ### Paragraphs
-- Markdown: Empty line separation
-- Word: New paragraph (`XWPFParagraph`)
-- Spacing: After = 10pt
+- Empty line separates paragraphs
+- Each paragraph becomes a `XWPFParagraph`
 
 ### Horizontal Rules
-- Markdown: `---`, `***`, or `___`
-- Word: Horizontal line using paragraph border
+- Markdown: `---` or `***`
+- Word: Bottom border on paragraph
+- POI: `paragraph.setBorderBottom(Borders.SINGLE)`
+
+### Blockquotes
+- Markdown: `> quoted text`
+- Word: Left indent + specific style
+- POI: `setIndentationLeft(720)`, italic formatting
 
 ## Lists
 
 ### Unordered Lists
-- Markdown: `-`, `*`, or `+`
-- Word: Numbering definition with bullet style
-- Nesting: Indent level 1-9
+| Markdown | Word Equivalent |
+|----------|-----------------|
+| `- item` | Bullet character • |
+| `* item` | Bullet character • |
+| `+ item` | Bullet character • |
+
+- POI: Use `XWPFNumbering` with `NUM_FMT.BULLET`
 
 ### Ordered Lists
-- Markdown: `1.`, `2.`, `3.`
-- Word: Numbering definition with decimal style
-- Nesting: Indent level 1-9, different numbering schemes per level
+| Markdown | Word Equivalent |
+|----------|-----------------|
+| `1. item` | Decimal numbering 1, 2, 3... |
+| `a. item` | Lowercase letter a, b, c... |
+| `A. item` | Uppercase letter A, B, C... |
 
-### List Nesting Rules
-```
-Level 1: 1. / 1) / - / *
-Level 2: a. / a) / - (dash)
-Level 3: i. / i) / • (circle)
-Level 4+: Continue pattern
-```
+- Nested lists: Increase indentation level
 
 ## Code Blocks
 
-### Inline Code
-```
-Markdown: `code here`
-Word: Font "Consolas", Size 10pt, Color #D83B01 (orange-ish)
-```
-
 ### Fenced Code Blocks
 ```
-Markdown:
 ```
-code block
+code here
 ```
-```
-Word:
-- Paragraph style "CodeBlock"
-- Font: Consolas, 9pt
-- Background: #F5F5F5 (light gray)
-- Border: 1pt solid #CCCCCC
-- Spacing: Before/After = 6pt
 ```
 
-## Links
+- Word: Paragraph with shaded background
+- Font: Courier New (monospace)
+- Size: 9pt
+- Background: Light gray (RGB: 245, 245, 245)
+- No spelling/grammar checking
 
-### Hyperlinks
-```
-Markdown: [link text](https://example.com)
-Word: XWPFHyperlink with URI set
-```
-
-### Automatic Links
-```
-Markdown: <https://example.com>
-Word: XWPFHyperlink with URL as text and URI
-```
-
-## Images
-
-### Inline Images
-```
-Markdown: ![alt text](path/to/image.png)
-Word: XWPFPicture embedded in paragraph
-```
-
-## Blockquotes
-
-### Quotes
-```
-Markdown: > quoted text
-Word:
-- Font: Italic
-- Left border: 3pt, color #4472C4
-- Indent: Left 20pt
-- Color: #595959 (dark gray)
-```
+### Indented Code Blocks
+- 4 spaces or 1 tab indentation
+- Same formatting as fenced code blocks
 
 ## Tables
 
-### Table Structure
-```
-Markdown:
-| Header 1 | Header 2 |
-|----------|----------|
-| Cell 1   | Cell 2   |
-```
-Word:
-- `XWPFTable` with border
-- Header row: Bold text, background #D9D9D9
-- Cell borders: 1pt single line
-- Auto-fit: Window resize
-- Alignment: As specified in Markdown (default left)
+| Markdown Element | Word Implementation |
+|------------------|---------------------|
+| `\| Header \|` | First row with bold text, gray background |
+| `| --- |` | Column boundary markers |
+| `\| Cell \|` | Regular cell |
+| Alignment `|:---|` | Cell alignment (left/center/right) |
 
-## Special Characters
+- POI: `XWPFTable` with `XWPFTableRow` and `XWPFTableCell`
+- Header row: Bold text, background color (RGB: 217, 217, 217)
 
-### HTML Entities
-| Entity | Word |
-|--------|------|
-| `&amp;` | & |
-| `&lt;` | < |
-| `&gt;` | > |
-| `&quot;` | " |
+## Links
 
-### Escaped Characters
-| Escaped | Word |
-|---------|------|
-| `\*` | * |
-| `\` | \ |
-| `\[` | [ |
+| Markdown | Word Implementation |
+|----------|---------------------|
+| `[text](url)` | Hyperlink with URL |
+| `<url>` | Plain text URL |
+
+- POI: `XWPFHyperlinkRun` with `Hyperlink` object
+- Link text is the display text
+- URL is stored in hyperlink target
+
+## Images
+
+| Markdown | Word Implementation |
+|----------|---------------------|
+| `![alt](path)` | Embedded inline image |
+
+- Supported formats: PNG, JPG, JPEG, GIF
+- POI: `XWPFRun.addPicture()`
+- Alt text stored in picture description
+- Relative path resolution from Markdown file location
+
+## Escaping
+
+| Markdown | Word Output |
+|----------|-------------|
+| `\*not italic\*` | *not italic* (plain text) |
+| `\\n` | Newline character |
 
 ## Whitespace Handling
 
-### Line Breaks
-- Markdown: Single newline → Word: Space (soft wrap)
-- Markdown: Two spaces + newline → Word: Line break (forced)
-- Markdown: Blank line → Word: New paragraph
+- Single newline: Space in Word (soft break)
+- Double newline: New paragraph (hard break)
+- Trailing spaces: Preserved
+- HTML entities: Decoded (&amp; → &)
 
-### Multiple Spaces
-- Markdown: Multiple spaces → Word: Single space (collapsed)
-- Code blocks: Preserve all spaces
+## Special Cases
+
+### HTML in Markdown
+- `<br>` → Line break in Word
+- `<strong>` → Bold
+- `<em>` → Italic
+- Other tags: Strip or preserve as plain text based on configuration
+
+### Task Lists
+- `- [x] completed` → Paragraph with checkbox symbol (☑ or ☐)
+- `- [ ] incomplete` → Paragraph with unchecked box
+
+### Definition Lists
+- `Term\n: Definition` → Bold term line + indented definition
