@@ -10,7 +10,7 @@
 - [x] Implement Markdown parser using flexmark → Can parse Markdown into AST nodes
 - [x] Implement Word document initializer → Creates empty .docx file with Apache POI
 - [x] Implement header conversion (h1-h6) → Markdown # Headers convert to Word headings with proper styles
-- [ ] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
+- [x] Implement paragraph conversion → Markdown paragraphs convert to Word paragraphs
 - [ ] Implement bold text conversion → Markdown **bold** converts to Word bold formatting
 - [ ] Implement italic text conversion → Markdown *italic* converts to Word italic formatting
 - [ ] Implement strikethrough conversion → Markdown ~~text~~ converts to Word strikethrough
