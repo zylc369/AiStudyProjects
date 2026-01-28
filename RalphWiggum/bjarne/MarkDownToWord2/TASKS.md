@@ -3,7 +3,7 @@
 ## Project Setup
 - [x] Create MarkDownToWordSource directory structure → MarkDownToWordSource/src/main/java and src/test/java directories exist
 - [x] Initialize Maven project with pom.xml → pom.xml created with required dependencies (Apache POI, flexmark, JUnit 5)
-- [ ] Configure Maven for Java 17 → pom.xml includes maven-compiler-plugin with source/target 17
+- [x] Configure Maven for Java 17 → pom.xml includes maven-compiler-plugin with source/target 17
 
 ## Core Converter Implementation
 - [ ] Create main MarkdownConverter class → MarkdownConverter.java exists with convert(String markdown, String outputPath) method
