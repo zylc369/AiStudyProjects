@@ -1,6 +1,7 @@
 package com.markdown.toword;
 
 import com.markdown.toword.converter.HeaderConverter;
+import com.markdown.toword.converter.ParagraphConverter;
 import com.markdown.toword.model.ConversionException;
 import com.markdown.toword.parser.MarkdownParser;
 
@@ -23,6 +24,7 @@ public class MarkdownConverter {
 
     private final MarkdownParser parser;
     private final HeaderConverter headerConverter;
+    private final ParagraphConverter paragraphConverter;
 
     /**
      * Creates a new MarkdownConverter with a default parser.
@@ -30,6 +32,7 @@ public class MarkdownConverter {
     public MarkdownConverter() {
         this.parser = new MarkdownParser();
         this.headerConverter = new HeaderConverter();
+        this.paragraphConverter = new ParagraphConverter();
     }
 
     /**
@@ -53,6 +56,9 @@ public class MarkdownConverter {
 
             // Convert headers
             headerConverter.convertHeaders(document, astDocument);
+
+            // Convert paragraphs
+            paragraphConverter.convertParagraphs(document, astDocument);
 
             // Ensure output directory exists
             Path outputFile = Paths.get(outputPath);
