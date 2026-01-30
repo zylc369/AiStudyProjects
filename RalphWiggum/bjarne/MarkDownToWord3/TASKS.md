@@ -6,7 +6,7 @@
 - [ ] Configure Maven for Java 17 → pom.xml includes maven-compiler-plugin with source/target 17 and UTF-8 encoding
 
 ## Core Infrastructure
-- [ ] Create ConversionException class → Custom exception class in model package with message and cause constructors
+- [x] Create ConversionException class → Custom exception class in model package with message and cause constructors
 - [ ] Create MarkdownParser class → Parses Markdown string to Flexmark AST Document using Parser.builder().build()
 - [ ] Create MarkdownConverter facade class → Main class with convert(String markdown, String outputPath) and convertFile(String inputPath, String outputPath) methods
 - [ ] Implement XWPFDocument creation → Creates empty Word document with proper POI XWPFDocument initialization
