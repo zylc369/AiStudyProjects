@@ -3,6 +3,7 @@ package com.markdown.toword.converter;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
 
@@ -35,6 +36,9 @@ public class InlineTextConverter {
             } else if (node instanceof Strikethrough strike) {
                 // ~~strikethrough~~
                 processStrikethroughText(paragraph, strike);
+            } else if (node instanceof Code code) {
+                // `inline code`
+                processInlineCodeText(paragraph, code);
             } else {
                 // For other node types, try to get text content
                 // This handles cases where we haven't implemented specific converters yet
@@ -194,5 +198,15 @@ public class InlineTextConverter {
             }
             child = child.getNext();
         }
+    }
+
+    /**
+     * Processes inline code (Code nodes).
+     * Handles the `inline code` Markdown syntax with monospace font.
+     */
+    private void processInlineCodeText(XWPFParagraph paragraph, Code code) {
+        XWPFRun run = paragraph.createRun();
+        run.setFontFamily("Courier New");
+        run.setText(code.getText().toString());
     }
 }

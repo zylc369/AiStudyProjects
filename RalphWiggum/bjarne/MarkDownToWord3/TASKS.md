@@ -26,7 +26,7 @@
 - [x] Add italic text support → `*italic*` and `_italic_` convert to italic in Word
 - [x] Add bold+italic support → `***bolditalic***` converts to bold+italic in Word
 - [x] Add strikethrough support → `~~strikethrough~~` converts to strikethrough in Word
-- [ ] Add inline code support → `` `code` `` converts to inline code with monospace font in Word
+- [x] Add inline code support → `` `code` `` converts to inline code with monospace font in Word
 
 ## Links and Images
 
