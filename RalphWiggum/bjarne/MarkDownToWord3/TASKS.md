@@ -68,7 +68,7 @@
 
 ## Documentation
 
-- [ ] Create README.md in MarkDownToWordSource → README includes usage instructions, examples, and build/run commands
+- [x] Create README.md in MarkDownToWordSource → README includes usage instructions, examples, and build/run commands
 - [ ] Add sample Markdown file for testing → Sample file exists demonstrating all supported features
 
 ## Verification
