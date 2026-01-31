@@ -6,6 +6,8 @@ import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.ast.BulletList;
+import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -27,11 +29,12 @@ import java.nio.file.Path;
  *   <li>Headings (levels 1-6) with proper Word styles</li>
  *   <li>Paragraphs with text formatting (bold, italic, bold-italic)</li>
  *   <li>Clickable hyperlinks</li>
+ *   <li>Bulleted lists (unordered lists)</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Lists, tables, and other elements</li>
+ *   <li>Ordered lists, tables, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -59,8 +62,10 @@ public class WordGenerator {
                     processHeading((Heading) node, document);
                 } else if (node instanceof Paragraph) {
                     processParagraph((Paragraph) node, document);
+                } else if (node instanceof BulletList) {
+                    processBulletList((BulletList) node, document);
                 }
-                // Other node types (List, etc.) will be added in future tasks
+                // Other node types (OrderedList, etc.) will be added in future tasks
             }
         }
 
@@ -181,6 +186,36 @@ public class WordGenerator {
                 }
             }
             // Other inline node types (Code, etc.) will be added in future tasks
+        }
+    }
+
+    /**
+     * Processes a Markdown bullet list node and adds it to the Word document.
+     *
+     * @param bulletList The flexmark BulletList node to process
+     * @param document The Word document to add the list to
+     */
+    private void processBulletList(BulletList bulletList, XWPFDocument document) {
+        // Iterate through list items
+        for (Node node : bulletList.getChildren()) {
+            if (node instanceof BulletListItem) {
+                BulletListItem listItem = (BulletListItem) node;
+
+                // Create paragraph with bullet style
+                XWPFParagraph paragraph = document.createParagraph();
+                paragraph.setStyle("List Bullet");
+
+                // Process the list item's content (typically a Paragraph node)
+                // List items can contain Paragraph nodes with inline content
+                for (Node itemChild : listItem.getChildren()) {
+                    if (itemChild instanceof Paragraph) {
+                        Paragraph itemParagraph = (Paragraph) itemChild;
+                        // Process inline content within the list item's paragraph
+                        processInlineContent(itemParagraph, paragraph, false, false);
+                    }
+                    // Nested lists will be handled in "Add nested list support" task
+                }
+            }
         }
     }
 }
