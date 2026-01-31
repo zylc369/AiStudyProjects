@@ -9,7 +9,7 @@
 
 ## Phase 2: Core Conversion Engine
 
-- [ ] Implement Markdown parser to parse input files → MarkdownParser.java can read .md files and produce AST
+- [x] Implement Markdown parser to parse input files → MarkdownParser.java can read .md files and produce AST
 - [ ] Implement Word document generator skeleton → WordGenerator.java creates empty .docx file
 - [ ] Add heading conversion (# ## ### #### ##### ######) → Headings render with appropriate styles in Word
 - [ ] Add paragraph text conversion → Plain text paragraphs render correctly in Word
