@@ -25,11 +25,11 @@
 - [x] Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
 - [ ] Add table support → Tables render with proper borders and cell merging in Word
 - [ ] Add horizontal rule support (---, ***) → Horizontal lines render in Word
-- [ ] Add image support (![alt](url)) → Images embed in Word document
+- [x] Add image support (![alt](url)) → Images embed in Word document
 
 ## Phase 4: CLI Interface & Integration
 
-- [ ] Create Main.java CLI entry point → Main.java accepts input.md and output.docx arguments
+- [x] Create Main.java CLI entry point → Main.java accepts input.md and output.docx arguments
 - [ ] Add command-line argument validation → Error message shown when arguments missing or invalid
 - [ ] Add progress/logging output → Conversion progress displays to console
 - [ ] Add error handling for file operations → Graceful error messages for file I/O failures
