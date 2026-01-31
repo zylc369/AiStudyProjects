@@ -2,6 +2,7 @@ package com.md2word.generator;
 
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
@@ -25,11 +26,12 @@ import java.nio.file.Path;
  * <ul>
  *   <li>Headings (levels 1-6) with proper Word styles</li>
  *   <li>Paragraphs with text formatting (bold, italic, bold-italic)</li>
+ *   <li>Clickable hyperlinks</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Links, lists, tables, and other elements</li>
+ *   <li>Lists, tables, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -112,7 +114,7 @@ public class WordGenerator {
 
     /**
      * Processes inline content within a block node (heading or paragraph).
-     * Handles mixed content including plain text, emphasis (italic), and strong (bold) formatting.
+     * Handles mixed content including plain text, emphasis (italic), strong (bold) formatting, and links.
      *
      * @param parent The parent node containing inline content
      * @param wordParagraph The Word paragraph to add runs to
@@ -151,8 +153,34 @@ public class WordGenerator {
                 // Bold text (**text** or __text__)
                 StrongEmphasis strong = (StrongEmphasis) child;
                 processInlineContent(strong, wordParagraph, true, inheritedItalic);
+            } else if (child instanceof Link) {
+                // Hyperlink [text](url)
+                Link link = (Link) child;
+                String url = link.getUrl().toString();
+
+                // Extract link text from children
+                StringBuilder linkText = new StringBuilder();
+                for (Node linkChild : link.getChildren()) {
+                    if (linkChild instanceof Text) {
+                        linkText.append(((Text) linkChild).getChars());
+                    }
+                    // For simplicity, ignore formatting within link text for now
+                }
+
+                String text = linkText.toString();
+                if (!text.isEmpty() && !url.isEmpty()) {
+                    // Create hyperlink run
+                    XWPFRun run = wordParagraph.createRun();
+                    run.setText(text);
+                    run.setBold(inheritedBold);
+                    run.setItalic(inheritedItalic);
+
+                    // Add hyperlink styling (blue color and underline)
+                    run.setColor("0000FF"); // Blue color for links
+                    run.setUnderline(org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE);
+                }
             }
-            // Other inline node types (Link, Code, etc.) will be added in future tasks
+            // Other inline node types (Code, etc.) will be added in future tasks
         }
     }
 }
