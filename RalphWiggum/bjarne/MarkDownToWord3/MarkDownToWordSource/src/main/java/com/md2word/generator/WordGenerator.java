@@ -13,14 +13,17 @@ import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.BlockQuote;
+import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -38,11 +41,12 @@ import java.nio.file.Path;
  *   <li>Numbered lists (ordered lists) with nested list support</li>
  *   <li>Code blocks (fenced ``` and inline `) with monospace font</li>
  *   <li>Blockquotes (>) with italic formatting and indentation</li>
+ *   <li>Images (![alt](url)) embedded in document</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Tables, blockquotes, and other elements</li>
+ *   <li>Tables, horizontal rules, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -79,7 +83,7 @@ public class WordGenerator {
                 } else if (node instanceof BlockQuote) {
                     processBlockQuote((BlockQuote) node, document);
                 }
-                // Other node types (tables, etc.) will be added in future tasks
+                // Other node types (tables, horizontal rules, images, etc.) will be added in future tasks
             }
         }
 
@@ -209,6 +213,10 @@ public class WordGenerator {
                     run.setText(codeText);
                     // Inline code should not inherit bold/italic formatting
                 }
+            } else if (child instanceof Image) {
+                // Image ![alt](url)
+                Image imageNode = (Image) child;
+                processImage(imageNode, wordParagraph);
             }
         }
     }
@@ -331,6 +339,60 @@ public class WordGenerator {
                 // Process inline content within the blockquote paragraph with italic formatting
                 processInlineContent(paragraphNode, paragraph, false, true); // italic=true
             }
+        }
+    }
+
+    /**
+     * Processes a Markdown image node and embeds it in the Word document.
+     *
+     * @param image The flexmark Image node to process
+     * @param wordParagraph The Word paragraph to add the image to
+     */
+    private void processImage(Image image, XWPFParagraph wordParagraph) {
+        // Extract image URL (treated as file path)
+        String imageUrl = image.getUrl().toString();
+
+        // Extract alt text (for accessibility)
+        String altText = image.getText().toString();
+        if (altText.isEmpty()) {
+            altText = imageUrl; // Fallback to URL if no alt text
+        }
+
+        // Create run for image
+        XWPFRun run = wordParagraph.createRun();
+
+        // Load and embed image from file
+        try (InputStream is = new FileInputStream(imageUrl)) {
+            // Detect file type from extension
+            int pictureType = detectPictureType(imageUrl);
+
+            // Add picture to document (let Word auto-size, use default dimensions)
+            run.addPicture(is, pictureType, imageUrl, 200, 200);
+        } catch (Exception e) {
+            // If image loading fails, add alt text as placeholder
+            run.setText("[Image: " + altText + "]");
+        }
+    }
+
+    /**
+     * Detects the picture type based on file extension.
+     *
+     * @param filename The image file path or URL
+     * @return The XWPFDocument picture type constant
+     */
+    private int detectPictureType(String filename) {
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".png")) {
+            return XWPFDocument.PICTURE_TYPE_PNG;
+        } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+            return XWPFDocument.PICTURE_TYPE_JPEG;
+        } else if (lower.endsWith(".gif")) {
+            return XWPFDocument.PICTURE_TYPE_GIF;
+        } else if (lower.endsWith(".bmp")) {
+            return XWPFDocument.PICTURE_TYPE_BMP;
+        } else {
+            // Default to PNG if unknown
+            return XWPFDocument.PICTURE_TYPE_PNG;
         }
     }
 }

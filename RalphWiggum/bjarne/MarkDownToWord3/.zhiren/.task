@@ -1,16 +1,16 @@
-TASK: Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
+TASK: Add image support (![alt](url)) → Images embed in Word document
 
-ACTION: Add support for Markdown blockquotes (using > prefix) to WordGenerator
+ACTION: Add support for Markdown images (![alt text](url)) to WordGenerator
 
-EXPECTED_OUTCOME: Quoted text has distinct formatting in Word
+EXPECTED_OUTCOME: Images embed in Word document
 
 EXISTING_CODE:
-- WordGenerator.java (lines 1-293) handles headings, paragraphs, lists, inline formatting, code blocks
+- WordGenerator.java handles headings, paragraphs, lists, inline formatting, code blocks, blockquotes
 - processInlineContent() method handles inline content: Text, Emphasis, StrongEmphasis, Link, Code
-- generate() method (lines 56-90) traverses AST and routes nodes to processor methods
-- Comment on line 78: "Other node types (tables, blockquotes, etc.) will be added in future tasks"
-- Current inline content processing: instanceof checks for Text, Emphasis, StrongEmphasis, Link, Code
+- generate() method (lines 56-83) traverses AST and routes nodes to processor methods
+- Comment on line 77: "Other node types (tables, horizontal rules, images, etc.) will be added in future tasks"
 - XWPFRun methods used: setText(), setBold(), setItalic(), setColor(), setUnderline(), setFontFamily()
+- Apache POI classes used: XWPFDocument, XWPFParagraph, XWPFRun
 
 PATTERNS:
 - instanceof checks for node type detection in AST traversal
@@ -18,95 +18,142 @@ PATTERNS:
 - processInlineContent() recursively processes inline children with inherited formatting
 - XWPFParagraph created for block-level elements
 - XWPFRun created within paragraphs for text segments
-- Font styling applied via XWPFRun methods
 
 PLAN:
-1. Understand flexmark blockquote AST structure:
-   - Blockquote node: com.vladsch.flexmark.ast.BlockQuote
-   - BlockQuote contains child nodes (typically Paragraph nodes)
-   - Need to process BlockQuote at block level in generate()
-   - BlockQuote children need inline content processing
+1. Understand flexmark image AST structure:
+   - Image node: com.vladsch.flexmark.ast.Image
+   - Image is an inline node (appears as child of Paragraph or other inline containers)
+   - Image node contains:
+     - URL: image source path (from url.getUrl())
+     - Alt text: image description (from text content via toString() or getChars())
+     - Title: optional tooltip (from title attribute)
+   - Image nodes are NOT block-level - they appear within paragraphs
 
-2. Add imports for blockquote node:
-   - import com.vladsch.flexmark.ast.BlockQuote;
+2. Add imports for image node:
+   - import com.vladsch.flexmark.ast.Image;
+   - import org.apache.poi.xwpf.usermodel.XWPFPictureData;
+   - import org.apache.poi.xwpf.usermodel.XWPFRun;
+   - import java.io.FileInputStream;
+   - import java.io.InputStream;
 
-3. Process blockquotes in generate() method:
-   - Add instanceof check for BlockQuote node
-   - Route to new processBlockQuote() method
+3. Process images in processInlineContent() method:
+   - Add instanceof check for Image node
+   - Route to new processImage() helper method
+   - Pass wordParagraph and inherited formatting parameters
 
-4. Implement processBlockQuote() method:
-   - Create XWPFParagraph for the blockquote
-   - Apply italic formatting to text (per spec: "Italic, left border, light gray background")
-   - Apply left border (more complex in Apache POI, might skip for initial implementation)
-   - Apply light gray background (complex in Apache POI, might skip for initial implementation)
-   - Process BlockQuote children (typically Paragraph nodes)
-   - Use processInlineContent() for inline text within blockquote paragraphs
+4. Understand Apache POI image embedding:
+   - XWPFRun.addPicture() method to embed images
+   - Requires InputStream for image data
+   - Supports formats: PNG, JPEG, GIF, WMF, etc.
+   - Picture dimensions: width, height (in EMU - English Metric Units)
+   - 1 EMU = 1/360,000 inch = 1/912,000 cm
+   - Default dimensions: use 200x200 pixels or calculate from image
 
-5. Word styling approach for blockquotes:
-   - Font styling: Italic (setItalic(true))
-   - Left border: Requires paragraph border configuration (complex, might skip)
-   - Background color: Requires CTShd object (complex, might skip)
-   - Simpler approach: Italic text with indentation
-   - Indentation: paragraph.setIndentationLeft() to set left margin
+5. Implementation approach for image loading:
+   - Option A: Load from URL (complex, requires HTTP client)
+   - Option B: Load from local file path (simpler, more practical for CLI tool)
+   - Decision: Use Option B (local file paths) - assumes images are local files
+   - URL in Image node is treated as file path relative to input Markdown file
 
-6. Code structure for processBlockQuote():
+6. Code structure for processImage():
    ```java
-   private void processBlockQuote(BlockQuote blockQuote, XWPFDocument document) {
-       // Process each child paragraph within the blockquote
-       for (Node child : blockQuote.getChildren()) {
-           if (child instanceof Paragraph) {
-               Paragraph paragraphNode = (Paragraph) child;
+   private void processImage(Image image, XWPFParagraph wordParagraph,
+                           boolean inheritedBold, boolean inheritedItalic) throws Exception {
+       // Extract image URL
+       String imageUrl = image.getUrl().toString();
 
-               // Create paragraph for blockquote content
-               XWPFParagraph paragraph = document.createParagraph();
+       // Extract alt text (for accessibility)
+       String altText = image.getText().toString();
+       if (altText.isEmpty()) {
+           altText = imageUrl; // Fallback to URL if no alt text
+       }
 
-               // Apply italic formatting
-               // Apply left indentation for visual distinction
-               paragraph.setIndentationLeft(720); // 720 twips = 0.5 inch
+       // Create run for image
+       XWPFRun run = wordParagraph.createRun();
 
-               // Process inline content within the blockquote paragraph
-               processInlineContent(paragraphNode, paragraph, false, true); // italic=true
-           }
+       // Load and embed image from file
+       try (InputStream is = new FileInputStream(imageUrl)) {
+           // Add picture to document
+           run.addPicture(is, XWPFDocument.PICTURE_TYPE_PNG);
+           // Note: May need to detect file type from extension
+       } catch (Exception e) {
+           // If image loading fails, add alt text as placeholder
+           run.setText("[Image: " + altText + "]");
        }
    }
    ```
 
-7. Simplified approach (if borders/background are too complex):
-   - Focus on italic text and indentation
-   - Indentation provides visual distinction
-   - Border and background can be enhancement in future
-   - This matches the pattern from code blocks (focus on core formatting first)
+7. File type detection:
+   - Extract file extension from imageUrl
+   - Map to XWPFDocument picture type constants:
+     - .png → XWPFDocument.PICTURE_TYPE_PNG
+     - .jpg/.jpeg → XWPFDocument.PICTURE_TYPE_JPEG
+     - .gif → XWPFDocument.PICTURE_TYPE_GIF
+     - Default: PICTURE_TYPE_PNG
 
-8. Indentation details:
-   - Apache POI uses twips (1/20 of a point)
-   - 720 twips = 0.5 inch
-   - 1440 twips = 1 inch
-   - Left indentation of 720 (0.5 inch) should be sufficient
+8. Image sizing:
+   - Use addPicture(is, type, width, height) overload
+   - Or let Word auto-size using addPicture(is, type)
+   - For initial implementation, let Word auto-size
+   - Can add manual sizing later if needed
 
-9. Edge cases to handle:
-   - Empty blockquotes (> with no text)
-   - Blockquotes with multiple paragraphs
-   - Blockquotes with inline formatting (bold, italic, links)
-   - Nested blockquotes (if supported by Markdown spec)
-   - Blockquotes with lists or other elements inside
+9. Error handling:
+   - Image file not found → Display alt text as placeholder
+   - Unsupported format → Display alt text as placeholder
+   - Invalid path → Display alt text as placeholder
+   - Wrap in try-catch to prevent conversion failure
 
-10. Update class JavaDoc:
-    - Add "Blockquotes (>) with italic formatting and indentation" to supported elements list
-    - Update line 43: "Tables, and other elements" → "Tables, blockquotes, and other elements"
+10. Integration with processInlineContent():
+    ```java
+    } else if (child instanceof Image) {
+        // Image ![alt](url)
+        try {
+            processImage((Image) child, wordParagraph, inheritedBold, inheritedItalic);
+        } catch (Exception e) {
+            // On error, create run with alt text placeholder
+            XWPFRun run = wordParagraph.createRun();
+            run.setText("[Image]");
+        }
+    }
+    ```
 
-11. Test scenarios:
-    - Simple blockquote with text
-    - Blockquote with multiple lines
-    - Blockquote with inline formatting (bold, links)
-    - Multi-paragraph blockquote
-    - Empty blockquote
+11. Edge cases to handle:
+    - Images with empty alt text
+    - Images at end of paragraph
+    - Multiple images in same paragraph
+    - Images with bold/italic formatting (should not inherit)
+    - Missing image files
+    - Relative vs absolute paths
 
-12. Files to modify:
+12. Update class JavaDoc:
+    - Add "Images (![alt](url)) embedded in document" to supported elements list
+    - Update line 42: "Tables, horizontal rules, images, and other elements" → "Tables, horizontal rules, and other elements"
+
+13. Test scenarios:
+    - Simple image with alt text
+    - Image without alt text
+    - Multiple images in same paragraph
+    - Image with bold formatting
+    - Missing image file
+    - Different image formats (PNG, JPEG)
+
+14. Files to modify:
     - MarkDownToWordSource/src/main/java/com/md2word/generator/WordGenerator.java
-      - Add import for BlockQuote
-      - Add processBlockQuote() method for blockquote processing
-      - Update generate() method to detect BlockQuote nodes
-      - Update class JavaDoc to reflect blockquote support
+      - Add imports for Image, XWPFPictureData, FileInputStream, InputStream
+      - Add processImage() helper method
+      - Add Image handling in processInlineContent()
+      - Update class JavaDoc to reflect image support
+
+15. Additional imports needed:
+    - import com.vladsch.flexmark.ast.Image;
+    - import org.apache.poi.xwpf.usermodel.XWPFPictureData;
+    - import java.io.FileInputStream;
+    - import java.io.InputStream;
+
+16. Method signature modification:
+    - processInlineContent() may need to throw Exception
+    - OR handle exceptions within processInlineContent()
+    - Decision: Handle exceptions inline to avoid changing existing signature
 
 FILES_TO_CREATE: None
 
@@ -114,7 +161,6 @@ TEST_COMMAND: mvn clean compile
 
 OUTCOME_VERIFICATION:
 - Compilation succeeds (mvn clean compile exits with 0)
-- Code inspection confirms BlockQuote detection in generate() method
-- processBlockQuote() method exists and applies italic formatting
-- processBlockQuote() method applies left indentation
-- Class JavaDoc mentions blockquotes in supported elements
+- Code inspection confirms Image detection in processInlineContent()
+- processImage() method exists and uses addPicture()
+- Class JavaDoc mentions images in supported elements
