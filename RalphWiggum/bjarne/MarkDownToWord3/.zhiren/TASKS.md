@@ -39,7 +39,7 @@
 - [x] Create sample Markdown test files → test-resources/samples/ contains test.md with various Markdown elements
 - [x] Add unit tests for heading conversion → Test verifies heading levels and text
 - [x] Add unit tests for text formatting → Test verifies bold, italic, and combinations
-- [ ] Add unit tests for list conversion → Test verifies ordered and unordered lists
+- [x] Add unit tests for list conversion → Test verifies ordered and unordered lists
 - [ ] Add unit tests for table conversion → Test verifies table structure and content
 - [ ] Add integration test for full document conversion → Test converts complete .md to .docx and verifies no content loss
 
