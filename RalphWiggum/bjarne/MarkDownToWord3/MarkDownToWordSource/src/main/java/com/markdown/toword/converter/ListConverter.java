@@ -36,10 +36,21 @@ public class ListConverter {
      * @param document The Word document to add content to
      */
     public void convertBulletList(BulletList bulletList, XWPFDocument document) {
+        convertBulletList(bulletList, document, 0);
+    }
+
+    /**
+     * Converts a BulletList node with specified nesting depth.
+     *
+     * @param bulletList The BulletList node from the AST
+     * @param document The Word document to add content to
+     * @param depth The nesting depth (0-2 for up to 3 levels)
+     */
+    public void convertBulletList(BulletList bulletList, XWPFDocument document, int depth) {
         Node child = bulletList.getFirstChild();
         while (child != null) {
             if (child instanceof BulletListItem item) {
-                convertListItem(item, document, true);
+                convertListItem(item, document, true, depth);
             }
             child = child.getNext();
         }
@@ -52,10 +63,21 @@ public class ListConverter {
      * @param document The Word document to add content to
      */
     public void convertOrderedList(OrderedList orderedList, XWPFDocument document) {
+        convertOrderedList(orderedList, document, 0);
+    }
+
+    /**
+     * Converts an OrderedList node with specified nesting depth.
+     *
+     * @param orderedList The OrderedList node from the AST
+     * @param document The Word document to add content to
+     * @param depth The nesting depth (0-2 for up to 3 levels)
+     */
+    public void convertOrderedList(OrderedList orderedList, XWPFDocument document, int depth) {
         Node child = orderedList.getFirstChild();
         while (child != null) {
             if (child instanceof OrderedListItem item) {
-                convertListItem(item, document, false);
+                convertListItem(item, document, false, depth);
             }
             child = child.getNext();
         }
@@ -67,8 +89,12 @@ public class ListConverter {
      * @param item The ListItem node
      * @param document The Word document
      * @param isBullet True for bullet list, false for numbered list
+     * @param depth The nesting depth (0-2 for up to 3 levels)
      */
-    private void convertListItem(ListItem item, XWPFDocument document, boolean isBullet) {
+    private void convertListItem(ListItem item, XWPFDocument document, boolean isBullet, int depth) {
+        // Limit depth to 2 (3 levels: 0, 1, 2)
+        int actualDepth = Math.min(depth, 2);
+
         // Create a new paragraph for this list item
         XWPFParagraph paragraph = document.createParagraph();
 
@@ -77,8 +103,8 @@ public class ListConverter {
         CTPPr ppr = ctp.isSetPPr() ? ctp.getPPr() : ctp.addNewPPr();
         CTNumPr numPr = ppr.isSetNumPr() ? ppr.getNumPr() : ppr.addNewNumPr();
 
-        // Set numbering level (0 for top level)
-        numPr.addNewIlvl().setVal(BigInteger.valueOf(0));
+        // Set numbering level based on depth
+        numPr.addNewIlvl().setVal(BigInteger.valueOf(actualDepth));
 
         if (isBullet) {
             // Bullet list format
@@ -95,6 +121,12 @@ public class ListConverter {
             if (itemChild instanceof com.vladsch.flexmark.ast.Paragraph para) {
                 // Process paragraph content
                 inlineTextConverter.processInlineNodes(paragraph, para.getFirstChild());
+            } else if (itemChild instanceof BulletList nestedBulletList) {
+                // Nested bullet list - recursively process
+                convertBulletList(nestedBulletList, document, depth + 1);
+            } else if (itemChild instanceof OrderedList nestedOrderedList) {
+                // Nested ordered list - recursively process
+                convertOrderedList(nestedOrderedList, document, depth + 1);
             } else {
                 // Process other inline content
                 inlineTextConverter.processInlineNodes(paragraph, itemChild);
