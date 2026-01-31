@@ -2,6 +2,7 @@ com/markdown/toword/converter/CodeBlockConverter.class
 com/markdown/toword/converter/BlockQuoteConverter.class
 com/markdown/toword/MarkdownConverter.class
 com/markdown/toword/model/ConversionException.class
+com/markdown/toword/converter/ThematicBreakConverter.class
 com/markdown/toword/parser/MarkdownParser.class
 com/markdown/toword/converter/ListConverter.class
 com/markdown/toword/converter/InlineTextConverter.class
