@@ -3,6 +3,8 @@ package com.md2word.generator;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Heading;
 import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.OrderedList;
+import com.vladsch.flexmark.ast.OrderedListItem;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
@@ -30,11 +32,12 @@ import java.nio.file.Path;
  *   <li>Paragraphs with text formatting (bold, italic, bold-italic)</li>
  *   <li>Clickable hyperlinks</li>
  *   <li>Bulleted lists (unordered lists)</li>
+ *   <li>Numbered lists (ordered lists)</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Ordered lists, tables, and other elements</li>
+ *   <li>Tables, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -64,8 +67,10 @@ public class WordGenerator {
                     processParagraph((Paragraph) node, document);
                 } else if (node instanceof BulletList) {
                     processBulletList((BulletList) node, document);
+                } else if (node instanceof OrderedList) {
+                    processOrderedList((OrderedList) node, document);
                 }
-                // Other node types (OrderedList, etc.) will be added in future tasks
+                // Other node types (tables, etc.) will be added in future tasks
             }
         }
 
@@ -204,6 +209,36 @@ public class WordGenerator {
                 // Create paragraph with bullet style
                 XWPFParagraph paragraph = document.createParagraph();
                 paragraph.setStyle("List Bullet");
+
+                // Process the list item's content (typically a Paragraph node)
+                // List items can contain Paragraph nodes with inline content
+                for (Node itemChild : listItem.getChildren()) {
+                    if (itemChild instanceof Paragraph) {
+                        Paragraph itemParagraph = (Paragraph) itemChild;
+                        // Process inline content within the list item's paragraph
+                        processInlineContent(itemParagraph, paragraph, false, false);
+                    }
+                    // Nested lists will be handled in "Add nested list support" task
+                }
+            }
+        }
+    }
+
+    /**
+     * Processes a Markdown ordered list node and adds it to the Word document.
+     *
+     * @param orderedList The flexmark OrderedList node to process
+     * @param document The Word document to add the list to
+     */
+    private void processOrderedList(OrderedList orderedList, XWPFDocument document) {
+        // Iterate through list items
+        for (Node node : orderedList.getChildren()) {
+            if (node instanceof OrderedListItem) {
+                OrderedListItem listItem = (OrderedListItem) node;
+
+                // Create paragraph with numbered list style
+                XWPFParagraph paragraph = document.createParagraph();
+                paragraph.setStyle("List Number");
 
                 // Process the list item's content (typically a Paragraph node)
                 // List items can contain Paragraph nodes with inline content
