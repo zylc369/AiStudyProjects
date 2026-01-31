@@ -55,7 +55,7 @@
 
 ## Main Entry Point
 
-- [ ] Create Main class with CLI support → JAR can be executed with `java -jar` accepting input and output file arguments
+- [x] Create Main class with CLI support → JAR can be executed with `java -jar` accepting input and output file arguments
 
 ## Testing
 
