@@ -47,7 +47,7 @@
 
 - [x] Create README.md in MarkDownToWordSource → README.md explains usage, prerequisites, and examples
 - [x] Add build and run instructions to README → Commands for compilation and execution documented (README.md:29-64)
-- [ ] Add sample Markdown file for testing → Sample .md file demonstrates all supported features
+- [x] Add sample Markdown file for testing → Sample .md file demonstrates all supported features (sample.md created with 210 lines)
 - [ ] Verify project compiles successfully → `mvn clean compile` completes with exit code 0
 - [ ] Run all tests and verify they pass → `mvn test` shows all tests passing
 - [ ] Manually verify Word output quality → Open generated .docx and verify formatting matches source Markdown
