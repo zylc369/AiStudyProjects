@@ -36,7 +36,7 @@
 
 ## Phase 5: Testing
 
-- [ ] Create sample Markdown test files → test-resources/samples/ contains test.md with various Markdown elements
+- [x] Create sample Markdown test files → test-resources/samples/ contains test.md with various Markdown elements
 - [ ] Add unit tests for heading conversion → Test verifies heading levels and text
 - [ ] Add unit tests for text formatting → Test verifies bold, italic, and combinations
 - [ ] Add unit tests for list conversion → Test verifies ordered and unordered lists
