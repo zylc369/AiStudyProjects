@@ -30,9 +30,9 @@
 ## Phase 4: CLI Interface & Integration
 
 - [x] Create Main.java CLI entry point → Main.java accepts input.md and output.docx arguments
-- [ ] Add command-line argument validation → Error message shown when arguments missing or invalid
-- [ ] Add progress/logging output → Conversion progress displays to console
-- [ ] Add error handling for file operations → Graceful error messages for file I/O failures
+- [x] Add command-line argument validation → Error message shown when arguments missing or invalid (Main.java:53-57, 64-72)
+- [x] Add progress/logging output → Conversion progress displays to console (Main.java:92)
+- [x] Add error handling for file operations → Graceful error messages for file I/O failures (Main.java:94-101)
 
 ## Phase 5: Testing
 
@@ -46,7 +46,7 @@
 ## Phase 6: Documentation & Verification
 
 - [x] Create README.md in MarkDownToWordSource → README.md explains usage, prerequisites, and examples
-- [ ] Add build and run instructions to README → Commands for compilation and execution documented
+- [x] Add build and run instructions to README → Commands for compilation and execution documented (README.md:29-64)
 - [ ] Add sample Markdown file for testing → Sample .md file demonstrates all supported features
 - [ ] Verify project compiles successfully → `mvn clean compile` completes with exit code 0
 - [ ] Run all tests and verify they pass → `mvn test` shows all tests passing
