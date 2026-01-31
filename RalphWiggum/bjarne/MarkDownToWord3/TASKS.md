@@ -47,7 +47,7 @@
 
 ## Tables
 
-- [ ] Add table support → Markdown tables convert to Word tables with proper borders and cell merging
+- [x] Add table support → Markdown tables convert to Word tables with proper borders and cell merging
 
 ## Advanced Features
 
