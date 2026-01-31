@@ -2,6 +2,7 @@
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/ParagraphConverter.java
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/HeaderConverter.java
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/parser/MarkdownParser.java
+/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/BlockQuoteConverter.java
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/InlineTextConverter.java
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/ListConverter.java
 /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/MarkDownToWordSource/src/main/java/com/markdown/toword/converter/CodeBlockConverter.java
