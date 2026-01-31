@@ -23,7 +23,7 @@
 - [x] Add nested list support → Nested lists maintain hierarchy in Word
 - [x] Add code block support (fenced ``` and inline `) → Code blocks use monospace font in Word
 - [x] Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
-- [ ] Add table support → Tables render with proper borders and cell merging in Word
+- [x] Add table support → Tables render with proper borders and cell merging in Word (TableBlock/TableRow/TableCell from com.vladsch.flexmark.ext.tables package)
 - [ ] Add horizontal rule support (---, ***) → Horizontal lines render in Word
 - [x] Add image support (![alt](url)) → Images embed in Word document
 

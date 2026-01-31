@@ -14,11 +14,17 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.BlockQuote;
 import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ext.tables.TableBlock;
+import com.vladsch.flexmark.ext.tables.TableRow;
+import com.vladsch.flexmark.ext.tables.TableCell;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,6 +48,7 @@ import java.nio.file.Path;
  *   <li>Code blocks (fenced ``` and inline `) with monospace font</li>
  *   <li>Blockquotes (>) with italic formatting and indentation</li>
  *   <li>Images (![alt](url)) embedded in document</li>
+ *   <li>Tables (GFM format) with proper borders and cell formatting</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
@@ -82,8 +89,10 @@ public class WordGenerator {
                     processCodeBlock((FencedCodeBlock) node, document);
                 } else if (node instanceof BlockQuote) {
                     processBlockQuote((BlockQuote) node, document);
+                } else if (node instanceof TableBlock) {
+                    processTable((TableBlock) node, document);
                 }
-                // Other node types (tables, horizontal rules, images, etc.) will be added in future tasks
+                // Other node types (horizontal rules, images, etc.) will be added in future tasks
             }
         }
 
@@ -393,6 +402,101 @@ public class WordGenerator {
         } else {
             // Default to PNG if unknown
             return XWPFDocument.PICTURE_TYPE_PNG;
+        }
+    }
+
+    /**
+     * Processes a Markdown table node and adds it to the Word document.
+     *
+     * @param table The flexmark TableBlock node to process
+     * @param document The Word document to add the table to
+     */
+    private void processTable(TableBlock table, XWPFDocument document) {
+        // Get table structure (rows and columns)
+        int rowCount = 0;
+        int columnCount = 0;
+
+        // First pass: count rows and determine maximum columns
+        for (Node rowNode : table.getChildren()) {
+            if (rowNode instanceof TableRow) {
+                rowCount++;
+                TableRow row = (TableRow) rowNode;
+                int rowColumns = 0;
+                for (Node cellNode : row.getChildren()) {
+                    if (cellNode instanceof TableCell) {
+                        rowColumns++;
+                    }
+                }
+                columnCount = Math.max(columnCount, rowColumns);
+            }
+        }
+
+        if (rowCount == 0 || columnCount == 0) {
+            return; // Empty table, skip
+        }
+
+        // Create table in Word document
+        XWPFTable wordTable = document.createTable(rowCount, columnCount);
+
+        // Process each row
+        int rowIndex = 0;
+        for (Node rowNode : table.getChildren()) {
+            if (rowNode instanceof TableRow) {
+                TableRow row = (TableRow) rowNode;
+                XWPFTableRow wordRow = wordTable.getRow(rowIndex);
+
+                // Process each cell in the row
+                int cellIndex = 0;
+                for (Node cellNode : row.getChildren()) {
+                    if (cellNode instanceof TableCell) {
+                        TableCell cell = (TableCell) cellNode;
+                        XWPFTableCell wordCell = wordRow.getCell(cellIndex);
+
+                        // Clear existing paragraphs (cells come with one empty paragraph)
+                        wordCell.getParagraphs().clear();
+
+                        // Process cell content (may contain multiple paragraphs)
+                        for (Node child : cell.getChildren()) {
+                            if (child instanceof Paragraph) {
+                                XWPFParagraph cellParagraph = wordCell.addParagraph();
+                                // Process inline content within the cell paragraph
+                                // First row (header) gets bold formatting
+                                processInlineContent((Paragraph) child, cellParagraph, rowIndex == 0, false);
+                            }
+                        }
+
+                        // If cell was empty, add an empty paragraph
+                        if (wordCell.getParagraphs().isEmpty()) {
+                            wordCell.addParagraph();
+                        }
+
+                        cellIndex++;
+                    }
+                }
+
+                // Fill remaining cells with empty content if row has fewer cells
+                while (cellIndex < columnCount) {
+                    XWPFTableCell emptyCell = wordRow.getCell(cellIndex);
+                    emptyCell.getParagraphs().clear();
+                    emptyCell.addParagraph();
+                    cellIndex++;
+                }
+
+                rowIndex++;
+            }
+        }
+
+        // Apply bold formatting to header row (first row)
+        if (rowIndex > 0) {
+            XWPFTableRow headerRow = wordTable.getRow(0);
+            for (int i = 0; i < columnCount; i++) {
+                XWPFTableCell headerCell = headerRow.getCell(i);
+                for (XWPFParagraph paragraph : headerCell.getParagraphs()) {
+                    for (XWPFRun run : paragraph.getRuns()) {
+                        run.setBold(true);
+                    }
+                }
+            }
         }
     }
 }

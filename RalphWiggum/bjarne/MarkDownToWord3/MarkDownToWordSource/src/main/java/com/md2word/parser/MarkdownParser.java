@@ -1,7 +1,11 @@
 package com.md2word.parser;
 
+import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
+import com.vladsch.flexmark.util.data.MutableDataSet;
+
+import java.util.Arrays;
 
 /**
  * MarkdownParser uses flexmark-java to parse Markdown content into an Abstract Syntax Tree (AST).
@@ -28,9 +32,13 @@ public class MarkdownParser {
     /**
      * Constructs a MarkdownParser with default flexmark options.
      * The parser is configured to support CommonMark and GitHub Flavored Markdown.
+     * TablesExtension is enabled to support GFM tables.
      */
     public MarkdownParser() {
-        this.parser = Parser.builder().build();
+        // Configure parser with TablesExtension to support GFM tables
+        MutableDataSet options = new MutableDataSet();
+        options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create()));
+        this.parser = Parser.builder(options).build();
     }
 
     /**
