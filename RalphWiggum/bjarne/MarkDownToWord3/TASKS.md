@@ -41,7 +41,7 @@
 
 ## Block Elements
 
-- [ ] Add code block support → Fenced code blocks (``` or ~~~) convert to formatted code blocks in Word with monospace font
+- [x] Add code block support → Fenced code blocks (``` or ~~~) convert to formatted code blocks in Word with monospace font
 - [ ] Add blockquote support → `> quote` converts to indented/italicized blockquote in Word
 - [ ] Add horizontal rule support → `---` converts to horizontal line in Word
 
