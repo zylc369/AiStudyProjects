@@ -4,6 +4,7 @@ import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
 
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -31,6 +32,9 @@ public class InlineTextConverter {
             } else if (node instanceof Emphasis em) {
                 // *italic* or _italic_
                 processItalicText(paragraph, em);
+            } else if (node instanceof Strikethrough strike) {
+                // ~~strikethrough~~
+                processStrikethroughText(paragraph, strike);
             } else {
                 // For other node types, try to get text content
                 // This handles cases where we haven't implemented specific converters yet
@@ -168,5 +172,27 @@ public class InlineTextConverter {
             child = child.getNext();
         }
         return text.toString();
+    }
+
+    /**
+     * Processes strikethrough text (Strikethrough nodes).
+     * Handles the ~~strikethrough~~ Markdown syntax.
+     */
+    private void processStrikethroughText(XWPFParagraph paragraph, Strikethrough strike) {
+        // Process children of the Strikethrough node
+        Node child = strike.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                XWPFRun run = paragraph.createRun();
+                run.setStrikeThrough(true);
+                run.setText(textNode.getChars().toString());
+            } else {
+                // Handle any other nested content with strikethrough
+                XWPFRun run = paragraph.createRun();
+                run.setStrikeThrough(true);
+                run.setText(getNodeText(child));
+            }
+            child = child.getNext();
+        }
     }
 }

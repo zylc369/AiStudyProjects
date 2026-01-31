@@ -3,6 +3,7 @@ package com.markdown.toword.parser;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
 
 /**
  * Parser for Markdown content using flexmark library.
@@ -13,10 +14,12 @@ public class MarkdownParser {
     private final Parser parser;
 
     /**
-     * Creates a new MarkdownParser with default options.
+     * Creates a new MarkdownParser with default options including extensions.
      */
     public MarkdownParser() {
         MutableDataSet options = new MutableDataSet();
+        // Enable GFM strikethrough extension (~~strikethrough~~)
+        options.set(Parser.EXTENSIONS, java.util.List.of(StrikethroughExtension.create()));
         this.parser = Parser.builder(options).build();
     }
 

@@ -483,3 +483,179 @@ PLAN. ===
 [2026-01-31 13:15:50] [INFO] Starting \033[94mPLAN Step\033[0m (session_is_new: false, session_id: 6BAD8DCB-B38D-4344-A0F4-5337B88AEC98, save_mode: false, \033[94mprompt_size: 6512 bytes)
 [2026-01-31 13:15:50] [INFO] [run_claude] Attempt 1 for PLAN phase
 [2026-01-31 13:15:50] [INFO] === AI PARAM [request_id=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98#PLAN#1#1] ===
+[2026-01-31 13:18:14] [INFO] First save the current step:EXECUTE. File Path:/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/zhiren_current_step
+[2026-01-31 13:18:14] [INFO] [2/4 EXECUTE] Implementing...
+[2026-01-31 13:18:14] [INFO] Claude session initialization completed. is_new:false, session_id:6BAD8DCB-B38D-4344-A0F4-5337B88AEC98.
+[2026-01-31 13:18:14] [INFO] Starting \033[94mEXECUTE Step\033[0m (session_is_new: false, session_id: 6BAD8DCB-B38D-4344-A0F4-5337B88AEC98, save_mode: false, \033[94mprompt_size: 6216 bytes)
+[2026-01-31 13:18:14] [INFO] [run_claude] Attempt 1 for EXECUTE phase
+[2026-01-31 13:18:14] [INFO] === AI PARAM [request_id=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98#EXECUTE#1#1] ===
+[2026-01-31 13:20:17] [INFO] 🚀 Starting Zhiren script...
+[2026-01-31 13:20:17] [INFO] ZHIREN_EXECUTE_SCENE=
+[2026-01-31 13:20:17] [INFO] SCRIPT_DIR=/Users/aserlili/.zhiren
+[2026-01-31 13:20:17] [INFO] ZHIREN_HOME=/Users/aserlili/.zhiren
+[2026-01-31 13:20:17] [INFO] ZHIREN_PROJECT_ROOT=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3
+[2026-01-31 13:20:17] [INFO] LOG_DIR=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs
+[2026-01-31 13:20:17] [INFO] LOG_FILE=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs/zhiren.log
+[2026-01-31 13:20:17] [INFO] ZHIREN_TMP_DIR=/tmp/zhiren-6523_1769836817
+[2026-01-31 13:20:17] [INFO] ZHIREN_CLAUDE_SESSION_FILE=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/claude_session_id
+[2026-01-31 13:20:17] [INFO] 
+[2026-01-31 13:20:17] [INFO] MAX_ITERATIONS not set - defaulting to 50 (2x remaining tasks: 25)
+[2026-01-31 13:20:17] [INFO] === Zhiren session started ===
+[2026-01-31 13:20:17] [INFO] Max iterations: 50, Safe mode: false, Batch mode: false (size: 5)
+[2026-01-31 13:20:17] [INFO] Working directory: /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3
+[2026-01-31 13:20:17] [INFO] Zhiren starting - max 50 iterations
+[2026-01-31 13:20:17] [INFO] Loop: PLAN → EXECUTE → REVIEW → FIX.
+[2026-01-31 13:20:17] [INFO] Logs: /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs/zhiren.log
+[2026-01-31 13:20:17] [INFO] 
+[2026-01-31 13:20:17] [INFO] === Iteration 1/50 (25 tasks remaining).Initial step: PLAN, index:0. ===
+[2026-01-31 13:20:17] [INFO] First save the current step:PLAN. File Path:/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/zhiren_current_step
+[2026-01-31 13:20:17] [INFO] [1/4 PLAN] Analyzing...
+[2026-01-31 13:20:17] [INFO] Claude session initialization completed. is_new:false, session_id:6BAD8DCB-B38D-4344-A0F4-5337B88AEC98.
+[2026-01-31 13:20:17] [INFO] Starting \033[94mPLAN Step\033[0m (session_is_new: false, session_id: 6BAD8DCB-B38D-4344-A0F4-5337B88AEC98, save_mode: false, \033[94mprompt_size: 6512 bytes)
+[2026-01-31 13:20:17] [INFO] [run_claude] Attempt 1 for PLAN phase
+[2026-01-31 13:20:17] [INFO] === AI PARAM [request_id=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98#PLAN#1#1] ===
+[2026-01-31 13:20:19] [INFO] First save the current step:EXECUTE. File Path:/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/zhiren_current_step
+[2026-01-31 13:20:19] [INFO] [2/4 EXECUTE] Implementing...
+[2026-01-31 13:20:19] [INFO] Claude session initialization completed. is_new:false, session_id:6BAD8DCB-B38D-4344-A0F4-5337B88AEC98.
+[2026-01-31 13:20:19] [INFO] Starting \033[94mEXECUTE Step\033[0m (session_is_new: false, session_id: 6BAD8DCB-B38D-4344-A0F4-5337B88AEC98, save_mode: false, \033[94mprompt_size: 6216 bytes)
+[2026-01-31 13:20:19] [INFO] [run_claude] Attempt 1 for EXECUTE phase
+[2026-01-31 13:20:19] [INFO] === AI PARAM [request_id=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98#EXECUTE#1#1] ===
+[2026-01-31 13:21:47] [INFO] 🚀 Starting Zhiren script...
+[2026-01-31 13:21:47] [INFO] ZHIREN_EXECUTE_SCENE=
+[2026-01-31 13:21:47] [INFO] SCRIPT_DIR=/Users/aserlili/.zhiren
+[2026-01-31 13:21:47] [INFO] ZHIREN_HOME=/Users/aserlili/.zhiren
+[2026-01-31 13:21:47] [INFO] ZHIREN_PROJECT_ROOT=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3
+[2026-01-31 13:21:47] [INFO] LOG_DIR=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs
+[2026-01-31 13:21:47] [INFO] LOG_FILE=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs/zhiren.log
+[2026-01-31 13:21:47] [INFO] ZHIREN_TMP_DIR=/tmp/zhiren-7313_1769836907
+[2026-01-31 13:21:47] [INFO] ZHIREN_CLAUDE_SESSION_FILE=/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/claude_session_id
+[2026-01-31 13:21:47] [INFO] 
+[2026-01-31 13:21:47] [INFO] MAX_ITERATIONS not set - defaulting to 50 (2x remaining tasks: 25)
+[2026-01-31 13:21:47] [INFO] === Zhiren session started ===
+[2026-01-31 13:21:47] [INFO] Max iterations: 50, Safe mode: false, Batch mode: false (size: 5)
+[2026-01-31 13:21:47] [INFO] Working directory: /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3
+[2026-01-31 13:21:47] [INFO] Zhiren starting - max 50 iterations
+[2026-01-31 13:21:47] [INFO] Loop: PLAN → EXECUTE → REVIEW → FIX.
+[2026-01-31 13:21:47] [INFO] Logs: /Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/logs/zhiren.log
+[2026-01-31 13:21:47] [INFO] 
+[2026-01-31 13:21:47] [INFO] === Iteration 1/50 (25 tasks remaining).Initial step: PLAN, index:0. ===
+[2026-01-31 13:21:47] [INFO] First save the current step:PLAN. File Path:/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3/.zhiren/zhiren_current_step
+[2026-01-31 13:21:47] [INFO] [1/4 PLAN] Analyzing...
+[2026-01-31 13:21:47] [INFO] Claude session initialization completed. is_new:false, session_id:6BAD8DCB-B38D-4344-A0F4-5337B88AEC98.
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=user_prompt,v=## DEVELOPMENT MODE - Testing Requirements
+
+**Testing is CRITICAL for the feedback loop:**
+- If no tests exist yet → flag as 🟡 ISSUE: "No tests - add test for this feature"
+- If tests exist but don't cover new code → flag as 🟡 ISSUE: "Add test coverage"
+- Tests let you VERIFY the implementation works - without them you're blind
+- A feature without tests is not truly complete
+
+
+
+---
+
+## Context from CONTEXT.md
+```markdown
+# Development Instructions
+
+## Context
+You are Asher, an autonomous AI development agent working on a Markdown to Word Converter project.
+
+## What We're Building
+A Java-based tool that converts Markdown files to Word documents (.docx format) with rich text formatting. The tool must:
+- Convert Markdown to Word with rich text (not plain text)
+- Support all Markdown formats: headers, links, italic, bold, tables, lists, blockquotes/alerts, code blocks, etc.
+- Preserve complete content from Markdown to Word
+- Include comprehensive test cases
+- Provide user documentation (README.md)
+
+## Existing Codebase (if applicable)
+This is a new project in `MarkDownToWord3/`, but there is a related project in `../MarkDownToWord2/` that shows the established architecture pattern:
+- **Package structure**: `com.markdown.toword.*`
+- **Components**:
+  - `MarkdownConverter` - Main converter class
+  - `MarkdownParser` - Parses Markdown to AST using flexmark
+  - Converters: `HeaderConverter`, `ParagraphConverter`, `InlineTextConverter`
+  - Model: `ConversionException`
+- **Architecture pattern**: AST-based conversion - parse Markdown to AST, then traverse and convert each node type to Word format
+- **Dependencies**: Apache POI (Word generation), flexmark-java (Markdown parsing)
+
+Use this architecture pattern as a reference, but implement all required Markdown features.
+
+## Tech Stack
+- **Language**: Java 17 (JDK 17.0.12)
+- **Build tool**: Maven
+- **Word document**: Apache POI (poi-ooxml 5.2.5)
+- **Markdown parsing**: flexmark-java (0.64.8)
+- **Testing**: JUnit 5 + AssertJ
+
+## Commands
+- Build: `mvn clean compile`
+- Test: `mvn test`
+- Package: `mvn package`
+- Run (after package): `java -jar target/markdown-to-word-1.0.0.jar <input.md> <output.docx>`
+
+## Technical Constraints
+- Must use Java 17 (match detected JDK 17.0.12)
+- Code must be placed in `MarkDownToWordSource/` directory
+- Must compile successfully
+- Must preserve all content from Markdown
+- Must produce equivalent formatting in Word
+- Must include comprehensive tests
+
+## References
+- specs/ for detailed specifications
+- `../MarkDownToWord2/MarkDownToWordSource/` for reference architecture
+```
+
+
+---
+
+
+
+# PLAN STEP
+
+**IMPORTANT: This is step 1 of 4 in an automated pipeline (PLAN → EXECUTE → REVIEW → FIX).**
+- There is NO human in the loop - your output feeds into the next step
+- Do NOT ask questions or request clarification - work with what you have
+- Be direct and factual - no conversational language needed
+
+You are planning ONE task from TASKS.md.
+
+## Your Job
+1. Read CONTEXT.md for project info and commands
+2. Read TASKS.md - find the FIRST unchecked `- [ ]` task
+   - **CRITICAL**: Only plan tasks marked `- [ ]` (unchecked)
+   - Skip any task marked `- [x]` (already complete)
+3. **Parse the task**: Extract ACTION and OUTCOME (format: `Action → Outcome`)
+4. Read specs/ folder for detailed specifications
+5. Search the codebase for existing patterns, utilities, components
+6. Write a plan to .task file
+
+## STOP: Verify Task Is Actually Unchecked
+Before planning, CONFIRM the task line starts with `- [ ]` (space between brackets).
+If it starts with `- [x]`, it's ALREADY DONE - do not plan it, do not create .task file.
+
+## Write to .task file:
+Read prompt_snippet_plan_write_to_task.md [in PROMPT SNIPPET DIRECTORY].
+
+## Architecture Principles
+- REUSE existing code - search first
+- EXTEND existing files when logical
+- ONE clear responsibility per file
+- Follow existing patterns in codebase
+- Match existing code style
+
+## Directory and File Path
+- Working directory: `/Users/aserlili/Documents/Codes/AiStudyProjects/RalphWiggum/bjarne/MarkDownToWord3`. All relative paths (e.g., .task, TASKS.md, CONTEXT.md, specs/) are relative to this directory.
+- PROMPT SNIPPET DIRECTORY: `/Users/aserlili/.zhiren/resources/prompts`.
+
+DO NOT implement unless explicitly asked. Just plan.
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=phase,v=PLAN
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=session_is_new,v=false
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=session_id,v=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=save_mode,v=false
+[2026-01-31 13:21:47] [INFO] [run_claude] Args Parse. k=loop_count,v=1
+[2026-01-31 13:21:47] [INFO] Starting \033[94mPLAN Step\033[0m (session_is_new: false, session_id: 6BAD8DCB-B38D-4344-A0F4-5337B88AEC98, save_mode: false, \033[94mprompt_size: 6512 bytes)
+[2026-01-31 13:21:47] [INFO] [run_claude] Attempt 1 for PLAN phase
+[2026-01-31 13:21:47] [INFO] === AI PARAM [request_id=6BAD8DCB-B38D-4344-A0F4-5337B88AEC98#PLAN#1#1] ===
