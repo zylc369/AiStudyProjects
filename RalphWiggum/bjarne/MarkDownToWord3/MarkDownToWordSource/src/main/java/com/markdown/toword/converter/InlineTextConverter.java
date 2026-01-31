@@ -1,0 +1,172 @@
+package com.markdown.toword.converter;
+
+import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.ast.StrongEmphasis;
+import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.util.ast.Node;
+
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+
+/**
+ * Converter for inline text formatting elements (bold, italic, etc.)
+ */
+public class InlineTextConverter {
+
+    /**
+     * Processes inline nodes within a paragraph and applies formatting.
+     *
+     * @param paragraph The Word paragraph to add runs to
+     * @param node The starting node to process
+     */
+    public void processInlineNodes(XWPFParagraph paragraph, Node node) {
+        while (node != null) {
+            if (node instanceof Text textNode) {
+                // Plain text - no special formatting
+                XWPFRun run = paragraph.createRun();
+                run.setText(textNode.getChars().toString());
+            } else if (node instanceof StrongEmphasis strong) {
+                // **bold** or __bold__
+                processBoldText(paragraph, strong);
+            } else if (node instanceof Emphasis em) {
+                // *italic* or _italic_
+                processItalicText(paragraph, em);
+            } else {
+                // For other node types, try to get text content
+                // This handles cases where we haven't implemented specific converters yet
+                String text = getNodeText(node);
+                if (!text.isEmpty()) {
+                    XWPFRun run = paragraph.createRun();
+                    run.setText(text);
+                }
+            }
+            node = node.getNext();
+        }
+    }
+
+    /**
+     * Processes bold text (StrongEmphasis nodes).
+     * Recursively processes children to handle nested formatting (e.g., bold+italic).
+     */
+    private void processBoldText(XWPFParagraph paragraph, StrongEmphasis strong) {
+        // Create a run for each child to properly handle nested formatting
+        Node child = strong.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                // Plain text within bold - create a bold run
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setText(textNode.getChars().toString());
+            } else if (child instanceof Emphasis em) {
+                // Nested italic within bold (***bolditalic***)
+                processBoldAndItalicText(paragraph, em);
+            } else if (child instanceof StrongEmphasis nestedStrong) {
+                // Double-nested bold - just treat as bold
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setText(getNodeText(nestedStrong));
+            } else {
+                // Other node types - treat as bold text
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setText(getNodeText(child));
+            }
+            child = child.getNext();
+        }
+    }
+
+    /**
+     * Processes italic text (Emphasis nodes).
+     * Recursively processes children to handle nested formatting (e.g., italic+bold).
+     */
+    private void processItalicText(XWPFParagraph paragraph, Emphasis em) {
+        // Create a run for each child to properly handle nested formatting
+        Node child = em.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                // Plain text within italic - create an italic run
+                XWPFRun run = paragraph.createRun();
+                run.setItalic(true);
+                run.setText(textNode.getChars().toString());
+            } else if (child instanceof StrongEmphasis strong) {
+                // Nested bold within italic (***bolditalic***)
+                processItalicAndBoldText(paragraph, strong);
+            } else if (child instanceof Emphasis nestedEm) {
+                // Double-nested italic - just treat as italic
+                XWPFRun run = paragraph.createRun();
+                run.setItalic(true);
+                run.setText(getNodeText(nestedEm));
+            } else {
+                // Other node types - treat as italic text
+                XWPFRun run = paragraph.createRun();
+                run.setItalic(true);
+                run.setText(getNodeText(child));
+            }
+            child = child.getNext();
+        }
+    }
+
+    /**
+     * Processes bold+italic text (StrongEmphasis containing Emphasis).
+     * Handles the ***bolditalic*** case where bold is outer, italic is inner.
+     */
+    private void processBoldAndItalicText(XWPFParagraph paragraph, Emphasis em) {
+        // Process children of the nested Emphasis
+        Node child = em.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setItalic(true);
+                run.setText(textNode.getChars().toString());
+            } else {
+                // Handle any other nested content with both formats
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setItalic(true);
+                run.setText(getNodeText(child));
+            }
+            child = child.getNext();
+        }
+    }
+
+    /**
+     * Processes italic+bold text (Emphasis containing StrongEmphasis).
+     * Handles the ***bolditalic*** case where italic is outer, bold is inner.
+     */
+    private void processItalicAndBoldText(XWPFParagraph paragraph, StrongEmphasis strong) {
+        // Process children of the nested StrongEmphasis
+        Node child = strong.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setItalic(true);
+                run.setText(textNode.getChars().toString());
+            } else {
+                // Handle any other nested content with both formats
+                XWPFRun run = paragraph.createRun();
+                run.setBold(true);
+                run.setItalic(true);
+                run.setText(getNodeText(child));
+            }
+            child = child.getNext();
+        }
+    }
+
+    /**
+     * Extracts text content from a node.
+     * Used as fallback for unhandled node types.
+     */
+    private String getNodeText(Node node) {
+        StringBuilder text = new StringBuilder();
+        Node child = node.getFirstChild();
+        while (child != null) {
+            if (child instanceof Text textNode) {
+                text.append(textNode.getChars());
+            }
+            child = child.getNext();
+        }
+        return text.toString();
+    }
+}

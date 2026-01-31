@@ -58,6 +58,7 @@
     </dependencies>
 
     <build>
+        <finalName>markdown-to-word-${project.version}</finalName>
         <plugins>
             <!-- Maven Compiler Plugin - configured for Java 17 -->
             <plugin>

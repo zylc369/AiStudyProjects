@@ -1,0 +1,46 @@
+TASK: Implement bold text conversion → Markdown **bold** converts to Word bold formatting
+
+ACTION: Create InlineTextConverter to handle text formatting (bold, italic, etc.) and integrate it with existing converters
+
+EXPECTED_OUTCOME: Markdown **bold** text renders with `setBold(true)` in Word output
+
+EXISTING_CODE:
+- ParagraphConverter.java - converts paragraphs but only handles plain Text nodes
+- HeaderConverter.java - uses `heading.getText()` which loses formatting (needs fixing too)
+- Pattern: `Node node = paragraph.getFirstChild(); while (node != null) { ... node = node.getNext(); }`
+
+PATTERNS:
+- Simple node iteration: `getFirstChild()` / `getNext()` pattern used in HeaderConverter and ParagraphConverter
+- Creating runs: `XWPFRun run = paragraph.createRun()` then `run.setText()`, `run.setBold(true)`
+
+PLAN:
+1. Create InlineTextConverter class that recursively processes inline nodes
+   - Handle `StrongEmphasis` nodes (Markdown **bold**) → setBold(true)
+   - Handle `Emphasis` nodes (Markdown *italic*) → setItalic(true) [prepare for next task]
+   - Handle `Text` nodes → plain text
+   - Recursively process child nodes to handle nested formatting (***bolditalic***)
+
+2. Integrate InlineTextConverter into ParagraphConverter
+   - Replace the simple StringBuilder text extraction with InlineTextConverter
+   - Pass the XWPFParagraph to InlineTextConverter so it can create runs with formatting
+
+3. Update HeaderConverter to use InlineTextConverter (headers can contain bold too)
+   - Replace `heading.getText()` with InlineTextConverter
+
+FILES_TO_CREATE:
+- MarkDownToWordSource/src/main/java/com/markdown/toword/converter/InlineTextConverter.java
+
+FILES_TO_MODIFY:
+- MarkDownToWordSource/src/main/java/com/markdown/toword/converter/ParagraphConverter.java
+- MarkDownToWordSource/src/main/java/com/markdown/toword/converter/HeaderConverter.java
+- MarkDownToWordSource/src/main/java/com/markdown/toword/MarkdownConverter.java (to wire new converter)
+
+TEST_COMMAND:
+mvn compile > /tmp/bjarne-41779_1769607465/build.log 2>&1; echo "Exit code: $?"
+
+OUTCOME_VERIFICATION:
+- BUILD SUCCESS from mvn compile
+- InlineTextConverter.java exists with processInlineNodes() method
+- ParagraphConverter calls InlineTextConverter instead of StringBuilder
+- grep -r "StrongEmphasis" MarkDownToWordSource/src/main/java/
+- grep -r "setBold" MarkDownToWordSource/src/main/java/

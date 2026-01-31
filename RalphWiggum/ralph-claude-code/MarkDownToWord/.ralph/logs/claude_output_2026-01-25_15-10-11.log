@@ -1,1 +1,40 @@
-{"type":"result","subtype":"success","is_error":false,"duration_ms":170535,"duration_api_ms":147410,"num_turns":36,"result":"## Summary\n\nI've successfully completed the MarkDown to Word Converter project with all the high-priority requirements from the PRD:\n\n### What Was Built:\n\n1. **Java Project Structure** - Complete Maven project in `MarkDownToWordSource/` directory\n2. **Core Converter** - `MarkdownToWordConverter.java` with support for:\n   - Headers (H1-H6)\n   - Text formatting (bold, italic, inline code)\n   - Tables (GFM tables)\n   - Lists (ordered and unordered)\n   - Code blocks (fenced and indented)\n   - Blockquotes\n   - Horizontal rules\n   - Links\n\n3. **Build Configuration** - Maven `pom.xml` configured for JDK 17 with:\n   - Apache POI for Word document generation\n   - CommonMark for Markdown parsing\n   - JUnit 5 and AssertJ for testing\n\n4. **Test Suite** - 6 comprehensive tests covering:\n   - Simple conversion\n   - Paragraphs\n   - Headers\n   - Code blocks\n   - Tables\n   - Error handling\n\n5. **Documentation** - Complete README.md with:\n   - Installation instructions\n   - Usage examples\n   - Feature list\n   - Troubleshooting guide\n\n### Verification:\n- ✅ Compiles successfully on JDK 17\n- ✅ All 6 tests pass\n- ✅ End-to-end conversion verified (sample.md → sample-output.docx)\n- ✅ Word document generated with proper formatting\n\nThe tool is ready to use. You can convert Markdown files to Word using:\n\n```bash\njava -jar MarkDownToWordSource/target/markdowntoword-converter-1.0.0-jar-with-dependencies.jar <input.md> <output.docx>\n```","session_id":"ecca1a77-3d56-4d60-b887-73cdaa204f52","total_cost_usd":0.9030210000000003,"usage":{"input_tokens":42848,"cache_creation_input_tokens":0,"cache_read_input_tokens":1417856,"output_tokens":11320,"server_tool_use":{"web_search_requests":0,"web_fetch_requests":0},"service_tier":"standard","cache_creation":{"ephemeral_1h_input_tokens":0,"ephemeral_5m_input_tokens":0}},"modelUsage":{"glm-4.7":{"inputTokens":98889,"outputTokens":11918,"cacheReadInputTokens":1425280,"cacheCreationInputTokens":0,"webSearchRequests":0,"costUSD":0.9030210000000003,"contextWindow":200000,"maxOutputTokens":32000}},"permission_denials":[],"uuid":"1c0d0755-c2b5-44d9-a493-3a3323613cc9"}
+{
+    "type": "result",
+    "subtype": "success",
+    "is_error": false,
+    "duration_ms": 170535,
+    "duration_api_ms": 147410,
+    "num_turns": 36,
+    "result": "## Summary\n\nI've successfully completed the MarkDown to Word Converter project with all the high-priority requirements from the PRD:\n\n### What Was Built:\n\n1. **Java Project Structure** - Complete Maven project in `MarkDownToWordSource/` directory\n2. **Core Converter** - `MarkdownToWordConverter.java` with support for:\n   - Headers (H1-H6)\n   - Text formatting (bold, italic, inline code)\n   - Tables (GFM tables)\n   - Lists (ordered and unordered)\n   - Code blocks (fenced and indented)\n   - Blockquotes\n   - Horizontal rules\n   - Links\n\n3. **Build Configuration** - Maven `pom.xml` configured for JDK 17 with:\n   - Apache POI for Word document generation\n   - CommonMark for Markdown parsing\n   - JUnit 5 and AssertJ for testing\n\n4. **Test Suite** - 6 comprehensive tests covering:\n   - Simple conversion\n   - Paragraphs\n   - Headers\n   - Code blocks\n   - Tables\n   - Error handling\n\n5. **Documentation** - Complete README.md with:\n   - Installation instructions\n   - Usage examples\n   - Feature list\n   - Troubleshooting guide\n\n### Verification:\n- ✅ Compiles successfully on JDK 17\n- ✅ All 6 tests pass\n- ✅ End-to-end conversion verified (sample.md → sample-output.docx)\n- ✅ Word document generated with proper formatting\n\nThe tool is ready to use. You can convert Markdown files to Word using:\n\n```bash\njava -jar MarkDownToWordSource/target/markdowntoword-converter-1.0.0-jar-with-dependencies.jar <input.md> <output.docx>\n```",
+    "session_id": "ecca1a77-3d56-4d60-b887-73cdaa204f52",
+    "total_cost_usd": 0.9030210000000003,
+    "usage": {
+        "input_tokens": 42848,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 1417856,
+        "output_tokens": 11320,
+        "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+        }
+    },
+    "modelUsage": {
+        "glm-4.7": {
+            "inputTokens": 98889,
+            "outputTokens": 11918,
+            "cacheReadInputTokens": 1425280,
+            "cacheCreationInputTokens": 0,
+            "webSearchRequests": 0,
+            "costUSD": 0.9030210000000003,
+            "contextWindow": 200000,
+            "maxOutputTokens": 32000
+        }
+    },
+    "permission_denials": [],
+    "uuid": "1c0d0755-c2b5-44d9-a493-3a3323613cc9"
+}
