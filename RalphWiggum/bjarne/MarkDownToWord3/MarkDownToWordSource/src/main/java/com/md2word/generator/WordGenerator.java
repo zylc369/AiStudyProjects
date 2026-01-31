@@ -12,6 +12,7 @@ import com.vladsch.flexmark.ast.BulletList;
 import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.BlockQuote;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -36,11 +37,12 @@ import java.nio.file.Path;
  *   <li>Bulleted lists (unordered lists) with nested list support</li>
  *   <li>Numbered lists (ordered lists) with nested list support</li>
  *   <li>Code blocks (fenced ``` and inline `) with monospace font</li>
+ *   <li>Blockquotes (>) with italic formatting and indentation</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Tables, and other elements</li>
+ *   <li>Tables, blockquotes, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -74,8 +76,10 @@ public class WordGenerator {
                     processOrderedList((OrderedList) node, document, 1);
                 } else if (node instanceof FencedCodeBlock) {
                     processCodeBlock((FencedCodeBlock) node, document);
+                } else if (node instanceof BlockQuote) {
+                    processBlockQuote((BlockQuote) node, document);
                 }
-                // Other node types (tables, blockquotes, etc.) will be added in future tasks
+                // Other node types (tables, etc.) will be added in future tasks
             }
         }
 
@@ -304,5 +308,29 @@ public class WordGenerator {
         XWPFRun run = paragraph.createRun();
         run.setFontFamily("Courier New");
         run.setText(code);
+    }
+
+    /**
+     * Processes a Markdown blockquote node and adds it to the Word document.
+     *
+     * @param blockQuote The flexmark BlockQuote node to process
+     * @param document The Word document to add the blockquote to
+     */
+    private void processBlockQuote(BlockQuote blockQuote, XWPFDocument document) {
+        // Process each child paragraph within the blockquote
+        for (Node child : blockQuote.getChildren()) {
+            if (child instanceof Paragraph) {
+                Paragraph paragraphNode = (Paragraph) child;
+
+                // Create paragraph for blockquote content
+                XWPFParagraph paragraph = document.createParagraph();
+
+                // Apply left indentation for visual distinction (720 twips = 0.5 inch)
+                paragraph.setIndentationLeft(720);
+
+                // Process inline content within the blockquote paragraph with italic formatting
+                processInlineContent(paragraphNode, paragraph, false, true); // italic=true
+            }
+        }
     }
 }

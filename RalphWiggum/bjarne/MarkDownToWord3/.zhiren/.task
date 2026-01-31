@@ -1,17 +1,16 @@
-TASK: Add code block support (fenced ``` and inline `) → Code blocks use monospace font in Word
+TASK: Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
 
-ACTION: Add support for Markdown code blocks (fenced code blocks with ```) and inline code (with `) to WordGenerator
+ACTION: Add support for Markdown blockquotes (using > prefix) to WordGenerator
 
-EXPECTED_OUTCOME: Code blocks use monospace font in Word
+EXPECTED_OUTCOME: Quoted text has distinct formatting in Word
 
 EXISTING_CODE:
-- WordGenerator.java (lines 1-268) handles headings, paragraphs, lists, inline formatting
-- processInlineContent() method (lines 134-195) handles inline content: Text, Emphasis, StrongEmphasis, Link
-- generate() method (lines 53-83) traverses AST and routes nodes to processor methods
-- Comment on line 193: "Other inline node types (Code, etc.) will be added in future tasks"
-- Comment on line 73: "Other node types (tables, etc.) will be added in future tasks"
-- Current inline content processing: instanceof checks for Text, Emphasis, StrongEmphasis, Link
-- XWPFRun methods used: setText(), setBold(), setItalic(), setColor(), setUnderline()
+- WordGenerator.java (lines 1-293) handles headings, paragraphs, lists, inline formatting, code blocks
+- processInlineContent() method handles inline content: Text, Emphasis, StrongEmphasis, Link, Code
+- generate() method (lines 56-90) traverses AST and routes nodes to processor methods
+- Comment on line 78: "Other node types (tables, blockquotes, etc.) will be added in future tasks"
+- Current inline content processing: instanceof checks for Text, Emphasis, StrongEmphasis, Link, Code
+- XWPFRun methods used: setText(), setBold(), setItalic(), setColor(), setUnderline(), setFontFamily()
 
 PATTERNS:
 - instanceof checks for node type detection in AST traversal
@@ -19,114 +18,95 @@ PATTERNS:
 - processInlineContent() recursively processes inline children with inherited formatting
 - XWPFParagraph created for block-level elements
 - XWPFRun created within paragraphs for text segments
-- Font styling applied via XWPFRun methods (setFontFamily(), setColor(), etc.)
+- Font styling applied via XWPFRun methods
 
 PLAN:
-1. Understand flexmark code block AST structure:
-   - Fenced code blocks: com.vladsch.flexmark.ast.FencedCodeBlock node
-   - Indented code blocks: com.vladsch.flexmark.ast.IndentedCodeBlock node
-   - Inline code: com.vladsch.flexmark.ast.Code node (appears as child of Paragraph)
-   - Need to detect both block-level and inline code nodes
+1. Understand flexmark blockquote AST structure:
+   - Blockquote node: com.vladsch.flexmark.ast.BlockQuote
+   - BlockQuote contains child nodes (typically Paragraph nodes)
+   - Need to process BlockQuote at block level in generate()
+   - BlockQuote children need inline content processing
 
-2. Add imports for code block nodes:
-   - import com.vladsch.flexmark.ast.FencedCodeBlock;
-   - import com.vladsch.flexmark.ast.IndentedCodeBlock;
-   - import com.vladsch.flexmark.ast.Code;
+2. Add imports for blockquote node:
+   - import com.vladsch.flexmark.ast.BlockQuote;
 
-3. Process fenced code blocks in generate() method:
-   - Add instanceof check for FencedCodeBlock node
-   - Add instanceof check for IndentedCodeBlock node (if needed)
-   - Route to new processCodeBlock() method
+3. Process blockquotes in generate() method:
+   - Add instanceof check for BlockQuote node
+   - Route to new processBlockQuote() method
 
-4. Implement processCodeBlock() method:
-   - Create XWPFParagraph for the code block
-   - Extract code content from FencedCodeBlock node using getContent() or getChars()
-   - Create XWPFRun with monospace font family: "Courier New" or "Consolas"
-   - Set light gray background (optional but recommended in spec)
-   - Preserve code formatting (no word wrap, preserve whitespace)
-   - Add code text to run
-   - Consider adding border or shading for visual distinction
+4. Implement processBlockQuote() method:
+   - Create XWPFParagraph for the blockquote
+   - Apply italic formatting to text (per spec: "Italic, left border, light gray background")
+   - Apply left border (more complex in Apache POI, might skip for initial implementation)
+   - Apply light gray background (complex in Apache POI, might skip for initial implementation)
+   - Process BlockQuote children (typically Paragraph nodes)
+   - Use processInlineContent() for inline text within blockquote paragraphs
 
-5. Process inline code in processInlineContent():
-   - Add instanceof check for Code node
-   - Extract inline code text using getChars() or getText()
-   - Create XWPFRun with monospace font
-   - Set light gray background to distinguish from surrounding text
-   - Handle inherited formatting (inline code usually shouldn't inherit bold/italic)
+5. Word styling approach for blockquotes:
+   - Font styling: Italic (setItalic(true))
+   - Left border: Requires paragraph border configuration (complex, might skip)
+   - Background color: Requires CTShd object (complex, might skip)
+   - Simpler approach: Italic text with indentation
+   - Indentation: paragraph.setIndentationLeft() to set left margin
 
-6. Word styling approach:
-   - Font family: "Courier New" (widely available) or "Consolas" (more modern)
-   - Background color: XWPFRun.setShading() with light gray fill
-   - Alternatively, use character highlighting if shading doesn't work well
-   - Consider border: Use paragraph border for code blocks (more complex)
-   - Simpler approach: Just monospace font + light background for both block and inline
-
-7. Code structure for processCodeBlock():
+6. Code structure for processBlockQuote():
    ```java
-   private void processCodeBlock(FencedCodeBlock codeBlock, XWPFDocument document) {
-       // Create paragraph for code block
-       XWPFParagraph paragraph = document.createParagraph();
+   private void processBlockQuote(BlockQuote blockQuote, XWPFDocument document) {
+       // Process each child paragraph within the blockquote
+       for (Node child : blockQuote.getChildren()) {
+           if (child instanceof Paragraph) {
+               Paragraph paragraphNode = (Paragraph) child;
 
-       // Extract code content
-       String code = codeBlock.getContent().toString();
+               // Create paragraph for blockquote content
+               XWPFParagraph paragraph = document.createParagraph();
 
-       // Create run with monospace font
-       XWPFRun run = paragraph.createRun();
-       run.setFontFamily("Courier New");
-       run.setText(code);
+               // Apply italic formatting
+               // Apply left indentation for visual distinction
+               paragraph.setIndentationLeft(720); // 720 twips = 0.5 inch
 
-       // Add light gray background (optional, using shading)
-       // Note: Shading in Apache POI is complex, might skip for initial implementation
+               // Process inline content within the blockquote paragraph
+               processInlineContent(paragraphNode, paragraph, false, true); // italic=true
+           }
+       }
    }
    ```
 
-8. Code structure for inline code in processInlineContent():
-   ```java
-   } else if (child instanceof Code) {
-       // Inline code `code`
-       Code codeNode = (Code) child;
-       String codeText = codeNode.getChars().toString();
+7. Simplified approach (if borders/background are too complex):
+   - Focus on italic text and indentation
+   - Indentation provides visual distinction
+   - Border and background can be enhancement in future
+   - This matches the pattern from code blocks (focus on core formatting first)
 
-       XWPFRun run = wordParagraph.createRun();
-       run.setFontFamily("Courier New");
-       run.setText(codeText);
-       // Optional: Add light background or different color
-   }
-   ```
+8. Indentation details:
+   - Apache POI uses twips (1/20 of a point)
+   - 720 twips = 0.5 inch
+   - 1440 twips = 1 inch
+   - Left indentation of 720 (0.5 inch) should be sufficient
 
-9. Background color implementation:
-   - Apache POI shading requires CTShd object and complex XML manipulation
-   - Simpler alternative: Use character highlighting with setColor() in light gray
-   - Or use setHighlightedColor() method if available
-   - For initial implementation, focus on monospace font first
-   - Background color can be enhancement if time permits
+9. Edge cases to handle:
+   - Empty blockquotes (> with no text)
+   - Blockquotes with multiple paragraphs
+   - Blockquotes with inline formatting (bold, italic, links)
+   - Nested blockquotes (if supported by Markdown spec)
+   - Blockquotes with lists or other elements inside
 
-10. Edge cases to handle:
-    - Empty code blocks (``` with no content)
-    - Code blocks with special characters (<, >, &, etc.)
-    - Very long code lines (might need word wrap considerations)
-    - Code blocks within lists (should be handled automatically)
-    - Inline code with formatting (should ignore inherited formatting)
+10. Update class JavaDoc:
+    - Add "Blockquotes (>) with italic formatting and indentation" to supported elements list
+    - Update line 43: "Tables, and other elements" → "Tables, blockquotes, and other elements"
 
-11. Update class JavaDoc:
-    - Add "Code blocks (fenced ``` and inline `)" to supported elements list
-    - Update line 40: "Code blocks, and other elements" → specific mention
+11. Test scenarios:
+    - Simple blockquote with text
+    - Blockquote with multiple lines
+    - Blockquote with inline formatting (bold, links)
+    - Multi-paragraph blockquote
+    - Empty blockquote
 
-12. Test scenarios:
-    - Simple fenced code block with ``` and content
-    - Inline code within paragraph text
-    - Code block with multiple lines
-    - Code block with special characters
-    - Empty code block
-    - Inline code at start/middle/end of paragraph
-
-13. Files to modify:
+12. Files to modify:
     - MarkDownToWordSource/src/main/java/com/md2word/generator/WordGenerator.java
-      - Add imports for FencedCodeBlock, IndentedCodeBlock, Code
-      - Add processCodeBlock() method for fenced code blocks
-      - Add Code handling in processInlineContent() for inline code
-      - Update generate() method to detect FencedCodeBlock nodes
-      - Update class JavaDoc to reflect code block support
+      - Add import for BlockQuote
+      - Add processBlockQuote() method for blockquote processing
+      - Update generate() method to detect BlockQuote nodes
+      - Update class JavaDoc to reflect blockquote support
 
 FILES_TO_CREATE: None
 
@@ -134,7 +114,7 @@ TEST_COMMAND: mvn clean compile
 
 OUTCOME_VERIFICATION:
 - Compilation succeeds (mvn clean compile exits with 0)
-- Code inspection confirms FencedCodeBlock detection in generate() method
-- processCodeBlock() method exists and uses monospace font
-- Inline code handling exists in processInlineContent()
-- Class JavaDoc mentions code blocks in supported elements
+- Code inspection confirms BlockQuote detection in generate() method
+- processBlockQuote() method exists and applies italic formatting
+- processBlockQuote() method applies left indentation
+- Class JavaDoc mentions blockquotes in supported elements
