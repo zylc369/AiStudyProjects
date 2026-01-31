@@ -4,11 +4,13 @@ import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
 
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 
 /**
  * Converter for inline text formatting elements (bold, italic, etc.)
@@ -39,6 +41,9 @@ public class InlineTextConverter {
             } else if (node instanceof Code code) {
                 // `inline code`
                 processInlineCodeText(paragraph, code);
+            } else if (node instanceof Link link) {
+                // [text](url)
+                processHyperlinkText(paragraph, link);
             } else {
                 // For other node types, try to get text content
                 // This handles cases where we haven't implemented specific converters yet
@@ -208,5 +213,29 @@ public class InlineTextConverter {
         XWPFRun run = paragraph.createRun();
         run.setFontFamily("Courier New");
         run.setText(code.getText().toString());
+    }
+
+    /**
+     * Processes hyperlinks (Link nodes).
+     * Handles the [text](url) Markdown syntax.
+     */
+    private void processHyperlinkText(XWPFParagraph paragraph, Link link) {
+        String url = link.getUrl().toString();
+        String text = link.getText().toString();
+
+        if (text.isEmpty()) {
+            // If no text provided, use the URL as the display text
+            text = url;
+        }
+
+        XWPFRun run = paragraph.createRun();
+        run.setText(text);
+        run.setColor("0000FF"); // Blue color for hyperlink
+        run.setUnderline(UnderlinePatterns.SINGLE);
+
+        // Note: For actual clickable hyperlinks in Word, we would need to use
+        // XWPFHyperlink or add hyperlink relationships to the document.
+        // This is a simplified implementation that shows visual hyperlink style.
+        // TODO: Implement actual clickable hyperlink using document relationships
     }
 }
