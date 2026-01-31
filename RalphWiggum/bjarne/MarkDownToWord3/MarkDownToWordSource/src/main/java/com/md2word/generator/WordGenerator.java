@@ -10,6 +10,8 @@ import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.ast.BulletList;
 import com.vladsch.flexmark.ast.BulletListItem;
+import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
  *   <li>Clickable hyperlinks</li>
  *   <li>Bulleted lists (unordered lists) with nested list support</li>
  *   <li>Numbered lists (ordered lists) with nested list support</li>
+ *   <li>Code blocks (fenced ``` and inline `) with monospace font</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
@@ -69,8 +72,10 @@ public class WordGenerator {
                     processBulletList((BulletList) node, document, 1);
                 } else if (node instanceof OrderedList) {
                     processOrderedList((OrderedList) node, document, 1);
+                } else if (node instanceof FencedCodeBlock) {
+                    processCodeBlock((FencedCodeBlock) node, document);
                 }
-                // Other node types (tables, etc.) will be added in future tasks
+                // Other node types (tables, blockquotes, etc.) will be added in future tasks
             }
         }
 
@@ -189,8 +194,18 @@ public class WordGenerator {
                     run.setColor("0000FF"); // Blue color for links
                     run.setUnderline(org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE);
                 }
+            } else if (child instanceof Code) {
+                // Inline code `code`
+                Code codeNode = (Code) child;
+                String codeText = codeNode.getChars().toString();
+
+                if (!codeText.isEmpty()) {
+                    XWPFRun run = wordParagraph.createRun();
+                    run.setFontFamily("Courier New");
+                    run.setText(codeText);
+                    // Inline code should not inherit bold/italic formatting
+                }
             }
-            // Other inline node types (Code, etc.) will be added in future tasks
         }
     }
 
@@ -264,5 +279,30 @@ public class WordGenerator {
                 }
             }
         }
+    }
+
+    /**
+     * Processes a Markdown fenced code block node and adds it to the Word document.
+     *
+     * @param codeBlock The flexmark FencedCodeBlock node to process
+     * @param document The Word document to add the code block to
+     */
+    private void processCodeBlock(FencedCodeBlock codeBlock, XWPFDocument document) {
+        // Create paragraph for code block
+        XWPFParagraph paragraph = document.createParagraph();
+
+        // Extract code content from the code block's text content
+        StringBuilder codeBuilder = new StringBuilder();
+        for (Node child : codeBlock.getChildren()) {
+            if (child instanceof Text) {
+                codeBuilder.append(((Text) child).getChars());
+            }
+        }
+        String code = codeBuilder.toString();
+
+        // Create run with monospace font
+        XWPFRun run = paragraph.createRun();
+        run.setFontFamily("Courier New");
+        run.setText(code);
     }
 }

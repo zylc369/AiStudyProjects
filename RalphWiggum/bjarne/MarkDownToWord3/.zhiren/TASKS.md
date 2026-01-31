@@ -20,7 +20,7 @@
 
 - [x] Add unordered list support (-, *, +) → Bulleted lists render correctly in Word
 - [x] Add ordered list support (1., 2., 3.) → Numbered lists render correctly in Word
-- [ ] Add nested list support → Nested lists maintain hierarchy in Word
+- [x] Add nested list support → Nested lists maintain hierarchy in Word
 - [ ] Add code block support (fenced ``` and inline `) → Code blocks use monospace font in Word
 - [ ] Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
 - [ ] Add table support → Tables render with proper borders and cell merging in Word

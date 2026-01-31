@@ -1,120 +1,132 @@
-TASK: Add nested list support → Nested lists maintain hierarchy in Word
+TASK: Add code block support (fenced ``` and inline `) → Code blocks use monospace font in Word
 
-ACTION: Add nested list detection and processing to WordGenerator to handle lists within lists (bulleted within bulleted, numbered within numbered, or mixed)
+ACTION: Add support for Markdown code blocks (fenced code blocks with ```) and inline code (with `) to WordGenerator
 
-EXPECTED_OUTCOME: Nested lists maintain hierarchy in Word
+EXPECTED_OUTCOME: Code blocks use monospace font in Word
 
 EXISTING_CODE:
-- processBulletList() method (line 203-218) handles top-level bulleted lists
-- processOrderedList() method (line 227-248) handles top-level numbered lists
-- Both methods iterate through list items and process Paragraph children
-- Both methods use "List Bullet" and "List Number" styles
-- Both methods have comments: "Nested lists will be handled in 'Add nested list support' task"
+- WordGenerator.java (lines 1-268) handles headings, paragraphs, lists, inline formatting
+- processInlineContent() method (lines 134-195) handles inline content: Text, Emphasis, StrongEmphasis, Link
+- generate() method (lines 53-83) traverses AST and routes nodes to processor methods
+- Comment on line 193: "Other inline node types (Code, etc.) will be added in future tasks"
+- Comment on line 73: "Other node types (tables, etc.) will be added in future tasks"
+- Current inline content processing: instanceof checks for Text, Emphasis, StrongEmphasis, Link
+- XWPFRun methods used: setText(), setBold(), setItalic(), setColor(), setUnderline()
 
 PATTERNS:
-- Node traversal using for loops over parent.getChildren()
-- instanceof checks for node type detection (BulletList, OrderedList)
-- processInlineContent() for extracting text from list item paragraphs
-- Paragraph style setting: paragraph.setStyle("List Bullet" or "List Number")
-- Reuse existing list processing methods recursively for nested lists
+- instanceof checks for node type detection in AST traversal
+- Separate helper methods for each node type (processHeading, processParagraph, etc.)
+- processInlineContent() recursively processes inline children with inherited formatting
+- XWPFParagraph created for block-level elements
+- XWPFRun created within paragraphs for text segments
+- Font styling applied via XWPFRun methods (setFontFamily(), setColor(), etc.)
 
 PLAN:
-1. Understand flexmark nested list structure:
-   - ListItem nodes can contain child nodes other than Paragraph
-   - Child nodes can be BulletList or OrderedList (nested lists)
-   - Need to detect and process these nested list nodes
-   - Nested lists appear as children of list items, not as siblings
+1. Understand flexmark code block AST structure:
+   - Fenced code blocks: com.vladsch.flexmark.ast.FencedCodeBlock node
+   - Indented code blocks: com.vladsch.flexmark.ast.IndentedCodeBlock node
+   - Inline code: com.vladsch.flexmark.ast.Code node (appears as child of Paragraph)
+   - Need to detect both block-level and inline code nodes
 
-2. Modify processBulletList() to handle nested lists:
-   - After processing Paragraph nodes, check for BulletList or OrderedList children
-   - When a nested list is found, recursively call processBulletList() or processOrderedList()
-   - Challenge: Need to maintain hierarchy (indentation levels) in Word
+2. Add imports for code block nodes:
+   - import com.vladsch.flexmark.ast.FencedCodeBlock;
+   - import com.vladsch.flexmark.ast.IndentedCodeBlock;
+   - import com.vladsch.flexmark.ast.Code;
 
-3. Word nested list approach:
-   - Word handles list hierarchy through numbering definitions
-   - Need to use XWPFNumbering to create proper indentation
-   - Alternatively, use different list styles for different levels (List Bullet 2, List Number 2, etc.)
-   - Simpler approach: Use Word's built-in multi-level list styles
-   - "List Bullet 2", "List Bullet 3" for nested bulleted lists
-   - "List Number 2", "List Number 3" for nested numbered lists
+3. Process fenced code blocks in generate() method:
+   - Add instanceof check for FencedCodeBlock node
+   - Add instanceof check for IndentedCodeBlock node (if needed)
+   - Route to new processCodeBlock() method
 
-4. Implementation strategy - two approaches:
+4. Implement processCodeBlock() method:
+   - Create XWPFParagraph for the code block
+   - Extract code content from FencedCodeBlock node using getContent() or getChars()
+   - Create XWPFRun with monospace font family: "Courier New" or "Consolas"
+   - Set light gray background (optional but recommended in spec)
+   - Preserve code formatting (no word wrap, preserve whitespace)
+   - Add code text to run
+   - Consider adding border or shading for visual distinction
 
-   **Approach A: Multi-level list styles (simpler)**
-   - Add a level parameter to processBulletList() and processOrderedList()
-   - processBulletList(list, document, level=1) → uses "List Bullet"
-   - processBulletList(list, document, level=2) → uses "List Bullet 2"
-   - When processing list items, detect nested lists and call with level+1
-   - Same for ordered lists
+5. Process inline code in processInlineContent():
+   - Add instanceof check for Code node
+   - Extract inline code text using getChars() or getText()
+   - Create XWPFRun with monospace font
+   - Set light gray background to distinguish from surrounding text
+   - Handle inherited formatting (inline code usually shouldn't inherit bold/italic)
 
-   **Approach B: Numbering definitions (more complex)**
-   - Create XWPFNumbering definitions for each list level
-   - Track numbering IDs across the document
-   - More complex but provides true Word list behavior
+6. Word styling approach:
+   - Font family: "Courier New" (widely available) or "Consolas" (more modern)
+   - Background color: XWPFRun.setShading() with light gray fill
+   - Alternatively, use character highlighting if shading doesn't work well
+   - Consider border: Use paragraph border for code blocks (more complex)
+   - Simpler approach: Just monospace font + light background for both block and inline
 
-   **Decision**: Use Approach A (multi-level list styles) for simplicity and initial implementation
-   - Word has built-in styles for up to 9 list levels
-   - "List Bullet", "List Bullet 2", "List Bullet 3", etc.
-   - "List Number", "List Number 2", "List Number 3", etc.
-
-5. Refactoring processBulletList() and processOrderedList():
-   - Add int level parameter to both methods
-   - Update style selection based on level:
-     - Level 1: "List Bullet" or "List Number"
-     - Level 2+: "List Bullet {level}" or "List Number {level}"
-   - When processing list item children, detect nested lists:
-     - if (itemChild instanceof BulletList) → processBulletList((BulletList) itemChild, document, level+1)
-     - if (itemChild instanceof OrderedList) → processOrderedList((OrderedList) itemChild, document, level+1)
-
-6. Code structure for processBulletList() with level parameter:
+7. Code structure for processCodeBlock():
    ```java
-   private void processBulletList(BulletList bulletList, XWPFDocument document, int level) {
-       for (Node node : bulletList.getChildren()) {
-           if (node instanceof BulletListItem) {
-               BulletListItem listItem = (BulletListItem) node;
+   private void processCodeBlock(FencedCodeBlock codeBlock, XWPFDocument document) {
+       // Create paragraph for code block
+       XWPFParagraph paragraph = document.createParagraph();
 
-               XWPFParagraph paragraph = document.createParagraph();
-               String style = (level == 1) ? "List Bullet" : "List Bullet " + level;
-               paragraph.setStyle(style);
+       // Extract code content
+       String code = codeBlock.getContent().toString();
 
-               for (Node itemChild : listItem.getChildren()) {
-                   if (itemChild instanceof Paragraph) {
-                       Paragraph itemParagraph = (Paragraph) itemChild;
-                       processInlineContent(itemParagraph, paragraph, false, false);
-                   } else if (itemChild instanceof BulletList) {
-                       processBulletList((BulletList) itemChild, document, level + 1);
-                   } else if (itemChild instanceof OrderedList) {
-                       processOrderedList((OrderedList) itemChild, document, level + 1);
-                   }
-               }
-           }
-       }
+       // Create run with monospace font
+       XWPFRun run = paragraph.createRun();
+       run.setFontFamily("Courier New");
+       run.setText(code);
+
+       // Add light gray background (optional, using shading)
+       // Note: Shading in Apache POI is complex, might skip for initial implementation
    }
    ```
 
-7. Update generate() method calls:
-   - processBulletList((BulletList) node, document, 1)
-   - processOrderedList((OrderedList) node, document, 1)
+8. Code structure for inline code in processInlineContent():
+   ```java
+   } else if (child instanceof Code) {
+       // Inline code `code`
+       Code codeNode = (Code) child;
+       String codeText = codeNode.getChars().toString();
 
-8. Edge cases to handle:
-   - Deeply nested lists (3+ levels)
-   - Mixed nesting (bullet within numbered, numbered within bullet)
-   - Empty list items at various levels
-   - Multiple paragraphs before nested list
+       XWPFRun run = wordParagraph.createRun();
+       run.setFontFamily("Courier New");
+       run.setText(codeText);
+       // Optional: Add light background or different color
+   }
+   ```
 
-9. Test scenarios:
-   - Simple nested bullet list (2 levels)
-   - Three-level nested bullet list
-   - Numbered list within bullet list
-   - Bullet list within numbered list
-   - Mixed deep nesting
+9. Background color implementation:
+   - Apache POI shading requires CTShd object and complex XML manipulation
+   - Simpler alternative: Use character highlighting with setColor() in light gray
+   - Or use setHighlightedColor() method if available
+   - For initial implementation, focus on monospace font first
+   - Background color can be enhancement if time permits
 
-10. Files to modify:
+10. Edge cases to handle:
+    - Empty code blocks (``` with no content)
+    - Code blocks with special characters (<, >, &, etc.)
+    - Very long code lines (might need word wrap considerations)
+    - Code blocks within lists (should be handled automatically)
+    - Inline code with formatting (should ignore inherited formatting)
+
+11. Update class JavaDoc:
+    - Add "Code blocks (fenced ``` and inline `)" to supported elements list
+    - Update line 40: "Code blocks, and other elements" → specific mention
+
+12. Test scenarios:
+    - Simple fenced code block with ``` and content
+    - Inline code within paragraph text
+    - Code block with multiple lines
+    - Code block with special characters
+    - Empty code block
+    - Inline code at start/middle/end of paragraph
+
+13. Files to modify:
     - MarkDownToWordSource/src/main/java/com/md2word/generator/WordGenerator.java
-      - Modify processBulletList() to accept level parameter and handle nested lists
-      - Modify processOrderedList() to accept level parameter and handle nested lists
-      - Update generate() method to pass level=1 to both methods
-      - Update class JavaDoc to reflect nested list support
+      - Add imports for FencedCodeBlock, IndentedCodeBlock, Code
+      - Add processCodeBlock() method for fenced code blocks
+      - Add Code handling in processInlineContent() for inline code
+      - Update generate() method to detect FencedCodeBlock nodes
+      - Update class JavaDoc to reflect code block support
 
 FILES_TO_CREATE: None
 
@@ -122,7 +134,7 @@ TEST_COMMAND: mvn clean compile
 
 OUTCOME_VERIFICATION:
 - Compilation succeeds (mvn clean compile exits with 0)
-- Code inspection confirms processBulletList() and processOrderedList() accept level parameter
-- Nested list detection logic checks for BulletList and OrderedList children
-- Recursion calls nested list methods with level+1
-- List styles use level parameter ("List Bullet 2", "List Number 2", etc.)
+- Code inspection confirms FencedCodeBlock detection in generate() method
+- processCodeBlock() method exists and uses monospace font
+- Inline code handling exists in processInlineContent()
+- Class JavaDoc mentions code blocks in supported elements
