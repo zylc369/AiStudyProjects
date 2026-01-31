@@ -5,12 +5,21 @@ import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
 
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.Document;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Converter for inline text formatting elements (bold, italic, etc.)
@@ -44,6 +53,9 @@ public class InlineTextConverter {
             } else if (node instanceof Link link) {
                 // [text](url)
                 processHyperlinkText(paragraph, link);
+            } else if (node instanceof Image image) {
+                // ![alt](url)
+                processImageText(paragraph, image);
             } else {
                 // For other node types, try to get text content
                 // This handles cases where we haven't implemented specific converters yet
@@ -237,5 +249,36 @@ public class InlineTextConverter {
         // XWPFHyperlink or add hyperlink relationships to the document.
         // This is a simplified implementation that shows visual hyperlink style.
         // TODO: Implement actual clickable hyperlink using document relationships
+    }
+
+    /**
+     * Processes images (Image nodes).
+     * Handles the ![alt](url) Markdown syntax.
+     */
+    private void processImageText(XWPFParagraph paragraph, Image image) {
+        String url = image.getUrl().toString();
+        String altText = image.getText().toString();
+
+        // For now, display the alt text as a placeholder
+        // Full image embedding would require:
+        // 1. Downloading the image from URL
+        // 2. Detecting image type (PNG, JPEG, etc.)
+        // 3. Adding image data to document using XWPFPictureData
+        // 4. Using XWPFRun.addPicture() to embed it
+
+        XWPFRun run = paragraph.createRun();
+        if (!altText.isEmpty()) {
+            run.setText("[Image: " + altText + "]");
+        } else {
+            run.setText("[Image: " + url + "]");
+        }
+        run.setItalic(true);
+        run.setColor("808080"); // Gray color for placeholder
+
+        // TODO: Implement actual image embedding:
+        // - Download image from URL
+        // - Determine picture type from URL/Content-Type
+        // - Use paragraph.getDocument().addPictureData()
+        // - Use run.addPicture() with appropriate parameters
     }
 }

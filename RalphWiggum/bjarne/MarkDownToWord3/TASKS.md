@@ -31,7 +31,7 @@
 ## Links and Images
 
 - [x] Add hyperlink support → `[text](url)` converts to clickable hyperlink in Word
-- [ ] Add image support → `![alt](url)` converts to embedded image in Word
+- [x] Add image support → `![alt](url)` converts to embedded image in Word
 
 ## Lists
 
