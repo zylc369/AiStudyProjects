@@ -14,6 +14,7 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.BlockQuote;
 import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ast.ThematicBreak;
 import com.vladsch.flexmark.ext.tables.TableBlock;
 import com.vladsch.flexmark.ext.tables.TableRow;
 import com.vladsch.flexmark.ext.tables.TableCell;
@@ -25,6 +26,7 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.Borders;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,11 +51,12 @@ import java.nio.file.Path;
  *   <li>Blockquotes (>) with italic formatting and indentation</li>
  *   <li>Images (![alt](url)) embedded in document</li>
  *   <li>Tables (GFM format) with proper borders and cell formatting</li>
+ *   <li>Horizontal rules (---, ***, ___) as horizontal lines</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Tables, horizontal rules, and other elements</li>
+ *   <li>Additional Markdown elements as needed</li>
  * </ul>
  */
 public class WordGenerator {
@@ -91,8 +94,10 @@ public class WordGenerator {
                     processBlockQuote((BlockQuote) node, document);
                 } else if (node instanceof TableBlock) {
                     processTable((TableBlock) node, document);
+                } else if (node instanceof ThematicBreak) {
+                    processThematicBreak((ThematicBreak) node, document);
                 }
-                // Other node types (horizontal rules, images, etc.) will be added in future tasks
+                // Other node types (images, etc.) will be added in future tasks
             }
         }
 
@@ -498,5 +503,20 @@ public class WordGenerator {
                 }
             }
         }
+    }
+
+    /**
+     * Processes a Markdown horizontal rule (thematic break) node and adds it to the Word document.
+     *
+     * @param thematicBreak The flexmark ThematicBreak node to process
+     * @param document The Word document to add the horizontal line to
+     */
+    private void processThematicBreak(ThematicBreak thematicBreak, XWPFDocument document) {
+        // Create a paragraph with a bottom border to simulate a horizontal line
+        XWPFParagraph paragraph = document.createParagraph();
+
+        // Apply bottom border to create horizontal line effect
+        // Borders.SINGLE creates a single line border
+        paragraph.setBorderBottom(Borders.SINGLE);
     }
 }
