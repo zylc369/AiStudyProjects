@@ -45,7 +45,7 @@
 
 ## Phase 6: Documentation & Verification
 
-- [ ] Create README.md in MarkDownToWordSource → README.md explains usage, prerequisites, and examples
+- [x] Create README.md in MarkDownToWordSource → README.md explains usage, prerequisites, and examples
 - [ ] Add build and run instructions to README → Commands for compilation and execution documented
 - [ ] Add sample Markdown file for testing → Sample .md file demonstrates all supported features
 - [ ] Verify project compiles successfully → `mvn clean compile` completes with exit code 0
