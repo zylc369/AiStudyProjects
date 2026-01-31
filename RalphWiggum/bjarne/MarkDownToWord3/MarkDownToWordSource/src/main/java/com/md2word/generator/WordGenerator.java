@@ -1,6 +1,7 @@
 package com.md2word.generator;
 
 import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
@@ -21,12 +22,13 @@ import java.nio.file.Path;
  * <p>Currently supported elements:</p>
  * <ul>
  *   <li>Headings (levels 1-6) with proper Word styles</li>
+ *   <li>Plain text paragraphs</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
  *   <li>Text formatting (bold, italic)</li>
- *   <li>Paragraphs, lists, tables, and other elements</li>
+ *   <li>Lists, tables, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -52,8 +54,10 @@ public class WordGenerator {
             for (Node node : ast.getChildren()) {
                 if (node instanceof Heading) {
                     processHeading((Heading) node, document);
+                } else if (node instanceof Paragraph) {
+                    processParagraph((Paragraph) node, document);
                 }
-                // Other node types (Paragraph, List, etc.) will be added in future tasks
+                // Other node types (List, etc.) will be added in future tasks
             }
         }
 
@@ -97,6 +101,38 @@ public class WordGenerator {
 
         // Add text content
         XWPFRun run = paragraph.createRun();
+        run.setText(text);
+    }
+
+    /**
+     * Processes a Markdown paragraph node and adds it to the Word document.
+     *
+     * @param paragraph The flexmark Paragraph node to process
+     * @param document The Word document to add the paragraph to
+     */
+    private void processParagraph(Paragraph paragraph, XWPFDocument document) {
+        // Extract text content from paragraph by traversing child nodes
+        StringBuilder textBuilder = new StringBuilder();
+        for (Node child : paragraph.getChildren()) {
+            if (child instanceof Text) {
+                textBuilder.append(((Text) child).getChars());
+            }
+            // For now, ignore inline formatting (Emphasis, Strong, Link, etc.)
+            // These will be handled in the "Add text formatting support" task
+        }
+
+        String text = textBuilder.toString();
+
+        // Skip empty paragraphs
+        if (text.isEmpty()) {
+            return;
+        }
+
+        // Create paragraph with default Word style (no special styling)
+        XWPFParagraph wordParagraph = document.createParagraph();
+
+        // Add text content
+        XWPFRun run = wordParagraph.createRun();
         run.setText(text);
     }
 }
