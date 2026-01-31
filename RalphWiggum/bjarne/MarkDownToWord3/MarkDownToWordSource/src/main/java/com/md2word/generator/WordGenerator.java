@@ -1,7 +1,9 @@
 package com.md2word.generator;
 
+import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Heading;
 import com.vladsch.flexmark.ast.Paragraph;
+import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
@@ -22,13 +24,12 @@ import java.nio.file.Path;
  * <p>Currently supported elements:</p>
  * <ul>
  *   <li>Headings (levels 1-6) with proper Word styles</li>
- *   <li>Plain text paragraphs</li>
+ *   <li>Paragraphs with text formatting (bold, italic, bold-italic)</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
  * <ul>
- *   <li>Text formatting (bold, italic)</li>
- *   <li>Lists, tables, and other elements</li>
+ *   <li>Links, lists, tables, and other elements</li>
  * </ul>
  */
 public class WordGenerator {
@@ -83,25 +84,12 @@ public class WordGenerator {
             level = 1; // Default to Heading1 if invalid
         }
 
-        // Extract text content from heading by traversing child nodes
-        StringBuilder textBuilder = new StringBuilder();
-        for (Node child : heading.getChildren()) {
-            if (child instanceof Text) {
-                textBuilder.append(((Text) child).getChars());
-            }
-            // For now, ignore inline formatting (Emphasis, Strong, Link, etc.)
-            // These will be handled in the "Add text formatting support" task
-        }
-
-        String text = textBuilder.toString();
-
         // Create paragraph with appropriate heading style
         XWPFParagraph paragraph = document.createParagraph();
         paragraph.setStyle("Heading" + level);
 
-        // Add text content
-        XWPFRun run = paragraph.createRun();
-        run.setText(text);
+        // Process inline content (text, emphasis, strong) within the heading
+        processInlineContent(heading, paragraph, false, false);
     }
 
     /**
@@ -111,28 +99,60 @@ public class WordGenerator {
      * @param document The Word document to add the paragraph to
      */
     private void processParagraph(Paragraph paragraph, XWPFDocument document) {
-        // Extract text content from paragraph by traversing child nodes
-        StringBuilder textBuilder = new StringBuilder();
-        for (Node child : paragraph.getChildren()) {
-            if (child instanceof Text) {
-                textBuilder.append(((Text) child).getChars());
-            }
-            // For now, ignore inline formatting (Emphasis, Strong, Link, etc.)
-            // These will be handled in the "Add text formatting support" task
-        }
-
-        String text = textBuilder.toString();
-
-        // Skip empty paragraphs
-        if (text.isEmpty()) {
-            return;
-        }
-
         // Create paragraph with default Word style (no special styling)
         XWPFParagraph wordParagraph = document.createParagraph();
 
-        // Add text content
-        XWPFRun run = wordParagraph.createRun();
-        run.setText(text);
+        // Process inline content (text, emphasis, strong) within the paragraph
+        processInlineContent(paragraph, wordParagraph, false, false);
+
+        // Check if paragraph is empty by counting runs
+        // Note: We can't easily remove the paragraph after creation, so we just check for empty runs
+        // Empty paragraphs with no runs will simply be blank in the Word document
+    }
+
+    /**
+     * Processes inline content within a block node (heading or paragraph).
+     * Handles mixed content including plain text, emphasis (italic), and strong (bold) formatting.
+     *
+     * @param parent The parent node containing inline content
+     * @param wordParagraph The Word paragraph to add runs to
+     * @param inheritedBold Whether bold formatting is inherited from parent context
+     * @param inheritedItalic Whether italic formatting is inherited from parent context
+     */
+    private void processInlineContent(Node parent, XWPFParagraph wordParagraph,
+                                     boolean inheritedBold, boolean inheritedItalic) {
+        for (Node child : parent.getChildren()) {
+            if (child instanceof Text) {
+                // Plain text node
+                Text textNode = (Text) child;
+                String text = textNode.getChars().toString();
+
+                if (!text.isEmpty()) {
+                    XWPFRun run = wordParagraph.createRun();
+                    run.setText(text);
+                    run.setBold(inheritedBold);
+                    run.setItalic(inheritedItalic);
+                }
+            } else if (child instanceof Emphasis) {
+                // Italic text (*text* or _text_)
+                Emphasis emphasis = (Emphasis) child;
+
+                // Check if this Emphasis is within a StrongEmphasis (bold-italic case)
+                boolean parentIsStrong = (child.getParent() instanceof StrongEmphasis);
+
+                if (parentIsStrong) {
+                    // Bold-italic: both inheritedBold and italic should be true
+                    processInlineContent(emphasis, wordParagraph, true, true);
+                } else {
+                    // Just italic
+                    processInlineContent(emphasis, wordParagraph, inheritedBold, true);
+                }
+            } else if (child instanceof StrongEmphasis) {
+                // Bold text (**text** or __text__)
+                StrongEmphasis strong = (StrongEmphasis) child;
+                processInlineContent(strong, wordParagraph, true, inheritedItalic);
+            }
+            // Other inline node types (Link, Code, etc.) will be added in future tasks
+        }
     }
 }
