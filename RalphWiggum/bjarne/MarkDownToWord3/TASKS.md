@@ -35,8 +35,8 @@
 
 ## Lists
 
-- [ ] Add unordered list support → `- item` and `* item` convert to bulleted list in Word
-- [ ] Add ordered list support → `1. item` converts to numbered list in Word
+- [x] Add unordered list support → `- item` and `* item` convert to bulleted list in Word
+- [x] Add ordered list support → `1. item` converts to numbered list in Word
 - [ ] Add nested list support → Nested lists (up to 3 levels) convert correctly in Word
 
 ## Block Elements

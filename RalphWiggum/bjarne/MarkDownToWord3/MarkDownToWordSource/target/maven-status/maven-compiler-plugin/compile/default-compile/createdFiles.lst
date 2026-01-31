@@ -1,6 +1,7 @@
-com/markdown/toword/parser/MarkdownParser.class
-com/markdown/toword/converter/InlineTextConverter.class
 com/markdown/toword/MarkdownConverter.class
 com/markdown/toword/model/ConversionException.class
+com/markdown/toword/parser/MarkdownParser.class
+com/markdown/toword/converter/ListConverter.class
+com/markdown/toword/converter/InlineTextConverter.class
 com/markdown/toword/converter/ParagraphConverter.class
 com/markdown/toword/converter/HeaderConverter.class
