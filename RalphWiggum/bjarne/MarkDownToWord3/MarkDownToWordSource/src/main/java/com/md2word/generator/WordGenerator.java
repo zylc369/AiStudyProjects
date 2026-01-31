@@ -31,8 +31,8 @@ import java.nio.file.Path;
  *   <li>Headings (levels 1-6) with proper Word styles</li>
  *   <li>Paragraphs with text formatting (bold, italic, bold-italic)</li>
  *   <li>Clickable hyperlinks</li>
- *   <li>Bulleted lists (unordered lists)</li>
- *   <li>Numbered lists (ordered lists)</li>
+ *   <li>Bulleted lists (unordered lists) with nested list support</li>
+ *   <li>Numbered lists (ordered lists) with nested list support</li>
  * </ul>
  *
  * <p>Future implementations will add:</p>
@@ -66,9 +66,9 @@ public class WordGenerator {
                 } else if (node instanceof Paragraph) {
                     processParagraph((Paragraph) node, document);
                 } else if (node instanceof BulletList) {
-                    processBulletList((BulletList) node, document);
+                    processBulletList((BulletList) node, document, 1);
                 } else if (node instanceof OrderedList) {
-                    processOrderedList((OrderedList) node, document);
+                    processOrderedList((OrderedList) node, document, 1);
                 }
                 // Other node types (tables, etc.) will be added in future tasks
             }
@@ -199,26 +199,32 @@ public class WordGenerator {
      *
      * @param bulletList The flexmark BulletList node to process
      * @param document The Word document to add the list to
+     * @param level The nesting level (1 for top-level, 2+ for nested)
      */
-    private void processBulletList(BulletList bulletList, XWPFDocument document) {
+    private void processBulletList(BulletList bulletList, XWPFDocument document, int level) {
         // Iterate through list items
         for (Node node : bulletList.getChildren()) {
             if (node instanceof BulletListItem) {
                 BulletListItem listItem = (BulletListItem) node;
 
-                // Create paragraph with bullet style
+                // Create paragraph with bullet style based on level
                 XWPFParagraph paragraph = document.createParagraph();
-                paragraph.setStyle("List Bullet");
+                String style = (level == 1) ? "List Bullet" : "List Bullet " + level;
+                paragraph.setStyle(style);
 
-                // Process the list item's content (typically a Paragraph node)
-                // List items can contain Paragraph nodes with inline content
+                // Process the list item's content (Paragraph nodes or nested lists)
                 for (Node itemChild : listItem.getChildren()) {
                     if (itemChild instanceof Paragraph) {
                         Paragraph itemParagraph = (Paragraph) itemChild;
                         // Process inline content within the list item's paragraph
                         processInlineContent(itemParagraph, paragraph, false, false);
+                    } else if (itemChild instanceof BulletList) {
+                        // Nested bullet list
+                        processBulletList((BulletList) itemChild, document, level + 1);
+                    } else if (itemChild instanceof OrderedList) {
+                        // Nested numbered list within bullet list
+                        processOrderedList((OrderedList) itemChild, document, level + 1);
                     }
-                    // Nested lists will be handled in "Add nested list support" task
                 }
             }
         }
@@ -229,26 +235,32 @@ public class WordGenerator {
      *
      * @param orderedList The flexmark OrderedList node to process
      * @param document The Word document to add the list to
+     * @param level The nesting level (1 for top-level, 2+ for nested)
      */
-    private void processOrderedList(OrderedList orderedList, XWPFDocument document) {
+    private void processOrderedList(OrderedList orderedList, XWPFDocument document, int level) {
         // Iterate through list items
         for (Node node : orderedList.getChildren()) {
             if (node instanceof OrderedListItem) {
                 OrderedListItem listItem = (OrderedListItem) node;
 
-                // Create paragraph with numbered list style
+                // Create paragraph with numbered list style based on level
                 XWPFParagraph paragraph = document.createParagraph();
-                paragraph.setStyle("List Number");
+                String style = (level == 1) ? "List Number" : "List Number " + level;
+                paragraph.setStyle(style);
 
-                // Process the list item's content (typically a Paragraph node)
-                // List items can contain Paragraph nodes with inline content
+                // Process the list item's content (Paragraph nodes or nested lists)
                 for (Node itemChild : listItem.getChildren()) {
                     if (itemChild instanceof Paragraph) {
                         Paragraph itemParagraph = (Paragraph) itemChild;
                         // Process inline content within the list item's paragraph
                         processInlineContent(itemParagraph, paragraph, false, false);
+                    } else if (itemChild instanceof BulletList) {
+                        // Nested bullet list within numbered list
+                        processBulletList((BulletList) itemChild, document, level + 1);
+                    } else if (itemChild instanceof OrderedList) {
+                        // Nested numbered list
+                        processOrderedList((OrderedList) itemChild, document, level + 1);
                     }
-                    // Nested lists will be handled in "Add nested list support" task
                 }
             }
         }

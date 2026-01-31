@@ -10,16 +10,16 @@
 ## Phase 2: Core Conversion Engine
 
 - [x] Implement Markdown parser to parse input files → MarkdownParser.java can read .md files and produce AST
-- [ ] Implement Word document generator skeleton → WordGenerator.java creates empty .docx file
-- [ ] Add heading conversion (# ## ### #### ##### ######) → Headings render with appropriate styles in Word
-- [ ] Add paragraph text conversion → Plain text paragraphs render correctly in Word
-- [ ] Add text formatting support (italic *text*, bold **text**, bold italic ***text***) → Formatted text renders with correct styles in Word
-- [ ] Add link support [text](url) → Links are clickable hyperlinks in Word document
+- [x] Implement Word document generator skeleton → WordGenerator.java creates empty .docx file
+- [x] Add heading conversion (# ## ### #### ##### ######) → Headings render with appropriate styles in Word
+- [x] Add paragraph text conversion → Plain text paragraphs render correctly in Word
+- [x] Add text formatting support (italic *text*, bold **text**, bold italic ***text***) → Formatted text renders with correct styles in Word
+- [x] Add link support [text](url) → Links are clickable hyperlinks in Word document
 
 ## Phase 3: Advanced Markdown Features
 
-- [ ] Add unordered list support (-, *, +) → Bulleted lists render correctly in Word
-- [ ] Add ordered list support (1., 2., 3.) → Numbered lists render correctly in Word
+- [x] Add unordered list support (-, *, +) → Bulleted lists render correctly in Word
+- [x] Add ordered list support (1., 2., 3.) → Numbered lists render correctly in Word
 - [ ] Add nested list support → Nested lists maintain hierarchy in Word
 - [ ] Add code block support (fenced ``` and inline `) → Code blocks use monospace font in Word
 - [ ] Add blockquote/alert support (>) → Quoted text has distinct formatting in Word
