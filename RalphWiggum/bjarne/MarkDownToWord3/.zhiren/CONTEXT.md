@@ -4,15 +4,17 @@
 You are Zhiren, an autonomous AI development agent working on a MarkDown to Word Converter tool project.
 
 ## What We're Building
-A Java-based command-line tool that converts MarkDown files to Word documents (.docx) with rich text formatting. The tool must preserve all MarkDown formatting including headings, links, italic/bold text, tables, lists, blockquotes/alerts, and code blocks, converting them to equivalent Word formatting.
+A Java-based command-line tool that converts MarkDown files to Word documents (.docx) and PDF documents (.pdf) with rich text formatting. The tool must preserve all MarkDown formatting including headings, links, italic/bold text, tables, lists, blockquotes/alerts, and code blocks, converting them to equivalent Word/PDF formatting.
 
 **Key Requirements:**
 - Convert MarkDown to rich text Word format (not plain text)
-- Preserve complete content from MarkDown to Word
+- Convert MarkDown to PDF format with preserved formatting
+- Preserve complete content from MarkDown to output format
 - Support all major MarkDown elements: headings, links, emphasis, tables, lists, blockquotes, code blocks
 - Java language with JDK 17.0.12
 - Include comprehensive test cases
 - Generate user documentation (README.md)
+- **CRITICAL**: PDF output must match Markdown content and format exactly (verified by comparison)
 
 ## Existing Codebase
 This is a NEW project - no existing codebase. Starting from scratch.
@@ -21,15 +23,17 @@ This is a NEW project - no existing codebase. Starting from scratch.
 - **Language:** Java
 - **JDK Version:** 17.0.12
 - **Build Tool:** Maven (inferred - standard for Java projects)
-- **Markdown Parser:** To be selected (e.g., CommonMark Java, flexmark-java)
-- **Word Generation:** To be selected (e.g., Apache POI, docx4j)
+- **Markdown Parser:** flexmark-java
+- **Word Generation:** Apache POI (XWPF for .docx)
+- **PDF Generation:** To be selected (iText or Apache PDFBox)
 - **Testing Framework:** JUnit 5 (standard for Java)
 
 ## Commands
 - Build: `mvn clean compile`
 - Test: `mvn test`
 - Package: `mvn package`
-- Run: `java -jar target/md2word-*.jar [input.md] [output.docx]`
+- Run (Word): `java -jar target/md2word-*.jar [input.md] [output.docx]`
+- Run (PDF): `java -jar target/md2word-*.jar [input.md] [output.pdf]`
 
 ## Technical Constraints
 - **JDK Version:** Must use Java 17 (JDK 17.0.12 specified)
@@ -54,11 +58,15 @@ MarkDownToWordSource/
 │   │           ├── parser/
 │   │           │   └── MarkdownParser.java
 │   │           └── generator/
-│   │               └── WordGenerator.java
+│   │               ├── WordGenerator.java  # Word document generation
+│   │               └── PDFGenerator.java   # PDF document generation (NEW)
 │   └── test/
 │       └── java/
 │           └── com/md2word/
-│               └── MarkdownToWordConverterTest.java
+│               ├── HeadingConversionTest.java
+│               ├── TextFormattingTest.java
+│               ├── ListConversionTest.java
+│               └── PDFConversionTest.java  # PDF conversion tests (NEW)
 └── test-resources/
     └── samples/                     # Sample Markdown files for testing
 ```

@@ -1,4 +1,5 @@
 {
-    "step": "EXECUTE",
-    "state": "Running"
+    "step": "FIX",
+    "state": "Success",
+    "nextStep": "PLAN"
 }

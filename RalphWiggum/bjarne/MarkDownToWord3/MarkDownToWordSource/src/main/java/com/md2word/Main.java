@@ -1,6 +1,7 @@
 package com.md2word;
 
 import com.md2word.generator.WordGenerator;
+import com.md2word.generator.PDFGenerator;
 import com.md2word.parser.MarkdownParser;
 import com.vladsch.flexmark.util.ast.Document;
 
@@ -10,25 +11,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Main entry point for the Markdown to Word Converter CLI tool.
+ * Main entry point for the Markdown to Document Converter CLI tool.
  *
  * <p>This command-line application converts Markdown files (.md) to Word documents (.docx)
- * with rich text formatting preserved.</p>
+ * or PDF documents (.pdf) with rich text formatting preserved.</p>
  *
  * <p><b>Usage:</b></p>
  * <pre>
- * java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main &lt;input.md&gt; &lt;output.docx&gt;
+ * java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main &lt;input.md&gt; &lt;output.docx|.pdf&gt;
  * </pre>
  *
  * <p><b>Arguments:</b></p>
  * <ul>
  *   <li>input.md - Path to the input Markdown file to convert</li>
- *   <li>output.docx - Path where the Word document will be created</li>
+ *   <li>output.docx or output.pdf - Path where the output document will be created</li>
  * </ul>
  *
- * <p><b>Example:</b></p>
+ * <p><b>Examples:</b></p>
  * <pre>
  * java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main README.md output.docx
+ * java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main README.md output.pdf
  * </pre>
  *
  * <p>The converter supports:</p>
@@ -45,9 +47,9 @@ import java.nio.file.Paths;
 public class Main {
 
     /**
-     * Main entry point for the Markdown to Word Converter.
+     * Main entry point for the Markdown to Document Converter.
      *
-     * @param args Command-line arguments: input.md path and output.docx path
+     * @param args Command-line arguments: input.md path and output.docx/.pdf path
      */
     public static void main(String[] args) {
         // Validate command-line arguments
@@ -58,6 +60,18 @@ public class Main {
 
         Path inputPath = Paths.get(args[0]);
         Path outputPath = Paths.get(args[1]);
+        String outputFileName = args[1];
+
+        // Determine output format based on file extension
+        boolean isPdfOutput = outputFileName.toLowerCase().endsWith(".pdf");
+        boolean isDocxOutput = outputFileName.toLowerCase().endsWith(".docx");
+
+        // Validate output file extension
+        if (!isPdfOutput && !isDocxOutput) {
+            System.err.println("Error: Output file must have .docx or .pdf extension");
+            System.err.println("  Got: " + outputFileName);
+            System.exit(1);
+        }
 
         try {
             // Validate input file exists and is readable
@@ -84,9 +98,16 @@ public class Main {
             MarkdownParser parser = new MarkdownParser();
             Document ast = parser.parse(markdownContent);
 
-            // Generate Word document from AST
-            WordGenerator generator = new WordGenerator();
-            generator.generate(ast, outputPath);
+            // Generate output document based on format
+            if (isPdfOutput) {
+                // Generate PDF document
+                PDFGenerator generator = new PDFGenerator();
+                generator.generate(ast, outputPath);
+            } else {
+                // Generate Word document
+                WordGenerator generator = new WordGenerator();
+                generator.generate(ast, outputPath);
+            }
 
             // Report success
             System.out.println("Conversion successful: " + inputPath + " -> " + outputPath);
@@ -106,13 +127,14 @@ public class Main {
      * Prints usage information to standard error.
      */
     private static void printUsage() {
-        System.err.println("Usage: java -cp <jar-file> com.md2word.Main <input.md> <output.docx>");
+        System.err.println("Usage: java -cp <jar-file> com.md2word.Main <input.md> <output.docx|output.pdf>");
         System.err.println();
         System.err.println("Arguments:");
-        System.err.println("  input.md    Path to the input Markdown file");
-        System.err.println("  output.docx Path to the output Word document");
+        System.err.println("  input.md          Path to the input Markdown file");
+        System.err.println("  output.docx/.pdf  Path to the output Word document (.docx) or PDF document (.pdf)");
         System.err.println();
-        System.err.println("Example:");
+        System.err.println("Examples:");
         System.err.println("  java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main README.md output.docx");
+        System.err.println("  java -cp target/md2word-1.0-SNAPSHOT.jar com.md2word.Main README.md output.pdf");
     }
 }

@@ -1,2 +1,4 @@
 com/md2word/parser/MarkdownParser.class
 com/md2word/generator/WordGenerator.class
+com/md2word/generator/PDFGenerator.class
+com/md2word/Main.class

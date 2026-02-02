@@ -18,6 +18,8 @@ import com.vladsch.flexmark.ast.ThematicBreak;
 import com.vladsch.flexmark.ext.tables.TableBlock;
 import com.vladsch.flexmark.ext.tables.TableRow;
 import com.vladsch.flexmark.ext.tables.TableCell;
+import com.vladsch.flexmark.ext.tables.TableHead;
+import com.vladsch.flexmark.ext.tables.TableBody;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -421,19 +423,33 @@ public class WordGenerator {
         int rowCount = 0;
         int columnCount = 0;
 
-        // First pass: count rows and determine maximum columns
-        for (Node rowNode : table.getChildren()) {
-            if (rowNode instanceof TableRow) {
-                rowCount++;
-                TableRow row = (TableRow) rowNode;
-                int rowColumns = 0;
-                for (Node cellNode : row.getChildren()) {
-                    if (cellNode instanceof TableCell) {
-                        rowColumns++;
+        // Collect all TableRow nodes from TableHead, TableBody (skip TableSeparator)
+        java.util.List<TableRow> allRows = new java.util.ArrayList<>();
+        for (Node child : table.getChildren()) {
+            if (child instanceof TableRow) {
+                // Direct TableRow (shouldn't happen with GFM but handle it)
+                allRows.add((TableRow) child);
+            } else if (child instanceof TableHead || child instanceof TableBody) {
+                // TableHead and TableBody contain TableRow children
+                for (Node rowNode : child.getChildren()) {
+                    if (rowNode instanceof TableRow) {
+                        allRows.add((TableRow) rowNode);
                     }
                 }
-                columnCount = Math.max(columnCount, rowColumns);
             }
+            // Skip TableSeparator
+        }
+
+        // First pass: count rows and determine maximum columns
+        for (TableRow row : allRows) {
+            rowCount++;
+            int rowColumns = 0;
+            for (Node cellNode : row.getChildren()) {
+                if (cellNode instanceof TableCell) {
+                    rowColumns++;
+                }
+            }
+            columnCount = Math.max(columnCount, rowColumns);
         }
 
         if (rowCount == 0 || columnCount == 0) {
@@ -445,50 +461,45 @@ public class WordGenerator {
 
         // Process each row
         int rowIndex = 0;
-        for (Node rowNode : table.getChildren()) {
-            if (rowNode instanceof TableRow) {
-                TableRow row = (TableRow) rowNode;
-                XWPFTableRow wordRow = wordTable.getRow(rowIndex);
+        for (TableRow row : allRows) {
+            XWPFTableRow wordRow = wordTable.getRow(rowIndex);
 
-                // Process each cell in the row
-                int cellIndex = 0;
-                for (Node cellNode : row.getChildren()) {
-                    if (cellNode instanceof TableCell) {
-                        TableCell cell = (TableCell) cellNode;
-                        XWPFTableCell wordCell = wordRow.getCell(cellIndex);
+            // Process each cell in the row
+            int cellIndex = 0;
+            for (Node cellNode : row.getChildren()) {
+                if (cellNode instanceof TableCell) {
+                    TableCell cell = (TableCell) cellNode;
+                    XWPFTableCell wordCell = wordRow.getCell(cellIndex);
 
-                        // Clear existing paragraphs (cells come with one empty paragraph)
-                        wordCell.getParagraphs().clear();
-
-                        // Process cell content (may contain multiple paragraphs)
-                        for (Node child : cell.getChildren()) {
-                            if (child instanceof Paragraph) {
-                                XWPFParagraph cellParagraph = wordCell.addParagraph();
-                                // Process inline content within the cell paragraph
-                                // First row (header) gets bold formatting
-                                processInlineContent((Paragraph) child, cellParagraph, rowIndex == 0, false);
-                            }
-                        }
-
-                        // If cell was empty, add an empty paragraph
-                        if (wordCell.getParagraphs().isEmpty()) {
-                            wordCell.addParagraph();
-                        }
-
-                        cellIndex++;
+                    // Remove all existing paragraphs (cells come with one empty paragraph)
+                    // Remove from the end to avoid index issues
+                    while (wordCell.getParagraphs().size() > 0) {
+                        wordCell.removeParagraph(0);
                     }
-                }
 
-                // Fill remaining cells with empty content if row has fewer cells
-                while (cellIndex < columnCount) {
-                    XWPFTableCell emptyCell = wordRow.getCell(cellIndex);
-                    emptyCell.getParagraphs().clear();
-                    emptyCell.addParagraph();
+                    // Process cell content
+                    // Table cells can contain inline nodes directly (StrongEmphasis, Emphasis, Text, etc.)
+                    // Use processInlineContent to handle formatting properly
+                    XWPFParagraph cellParagraph = wordCell.addParagraph();
+                    // First row (header) gets bold formatting as base style
+                    processInlineContent(cell, cellParagraph, rowIndex == 0, false);
+
                     cellIndex++;
                 }
-
-                rowIndex++;
             }
+
+            // Fill remaining cells with empty content if row has fewer cells
+            while (cellIndex < columnCount) {
+                XWPFTableCell emptyCell = wordRow.getCell(cellIndex);
+                // Remove all existing paragraphs
+                while (emptyCell.getParagraphs().size() > 0) {
+                    emptyCell.removeParagraph(0);
+                }
+                emptyCell.addParagraph();
+                cellIndex++;
+            }
+
+            rowIndex++;
         }
 
         // Apply bold formatting to header row (first row)
@@ -518,5 +529,28 @@ public class WordGenerator {
         // Apply bottom border to create horizontal line effect
         // Borders.SINGLE creates a single line border
         paragraph.setBorderBottom(Borders.SINGLE);
+    }
+
+    /**
+     * Extracts text content from a node and its children recursively.
+     * Used for table cells that may not have explicit Paragraph nodes.
+     *
+     * @param node The node to extract text from
+     * @return The concatenated text content
+     */
+    private String extractTextFromNode(Node node) {
+        StringBuilder text = new StringBuilder();
+
+        // If it's a Text node, append its content
+        if (node instanceof Text) {
+            text.append(((Text) node).getChars());
+        } else {
+            // Otherwise, recursively get text from children
+            for (Node child : node.getChildren()) {
+                text.append(extractTextFromNode(child));
+            }
+        }
+
+        return text.toString();
     }
 }

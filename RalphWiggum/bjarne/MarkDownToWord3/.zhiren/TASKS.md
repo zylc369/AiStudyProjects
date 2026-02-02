@@ -40,8 +40,8 @@
 - [x] Add unit tests for heading conversion → Test verifies heading levels and text
 - [x] Add unit tests for text formatting → Test verifies bold, italic, and combinations
 - [x] Add unit tests for list conversion → Test verifies ordered and unordered lists
-- [ ] Add unit tests for table conversion → Test verifies table structure and content
-- [ ] Add integration test for full document conversion → Test converts complete .md to .docx and verifies no content loss
+- [x] Add unit tests for table conversion → Test verifies table structure and content
+- [x] Add integration test for full document conversion → Test converts complete .md to .docx and verifies no content loss
 
 ## Phase 6: Documentation & Verification
 
@@ -51,3 +51,23 @@
 - [x] Verify project compiles successfully → `mvn clean compile` completes with exit code 0 (BUILD SUCCESS confirmed, 3 source files compiled)
 - [x] Run all tests and verify they pass → `mvn test` shows all tests passing (25/25 tests passed: 8 heading + 9 text formatting + 8 list conversion)
 - [x] Manually verify Word output quality → Open generated .docx and verify formatting matches source Markdown (sample-output.docx generated: 4.5K, valid Microsoft OOXML format)
+
+## Phase 7: PDF Export Feature (NEW REQUIREMENT)
+
+- [x] Add PDF generation library dependency → Add iText or Apache PDFBox to pom.xml for PDF creation
+- [x] Create PDFGenerator class in com.md2word.generator package → Implement PDF document generation with proper structure
+- [x] Implement Markdown to PDF conversion pipeline → Convert Markdown AST directly to PDF format
+- [x] Add PDF export option to CLI interface → Main.java accepts .pdf output extension and routes to PDF generator
+- [x] Implement heading styles in PDF → PDF headings use proper font sizes and hierarchy
+- [x] Implement text formatting in PDF → Bold, italic, and bold-italic render correctly in PDF
+- [x] Implement hyperlink support in PDF → Links are clickable in PDF document
+- [x] Implement list support in PDF → Ordered and unordered lists with proper indentation in PDF
+- [x] Implement code blocks in PDF → Monospace font with background for code in PDF
+- [x] Implement blockquote support in PDF → Distinct formatting for quoted text in PDF
+- [x] Implement table support in PDF → Tables render with borders in PDF
+- [x] Implement image embedding in PDF → Images embed correctly in PDF document
+- [x] Add unit tests for PDF conversion → PDFConversionTest.java verifies PDF generation success
+- [x] Test simple Markdown to PDF conversion → Convert test-simple.md to test-simple.pdf and verify content/format match
+- [x] Test README.md to PDF conversion → Convert MarkDownToWordSource/README.md to README.pdf and verify content/format match
+- [x] Update README.md with PDF usage instructions → Document PDF conversion examples and requirements
+- [x] Create quality report for PDF output → QUALITY_REPORT_PDF.md documents PDF conversion testing results

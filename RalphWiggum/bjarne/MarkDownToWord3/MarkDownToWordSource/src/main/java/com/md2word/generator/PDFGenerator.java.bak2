@@ -1,0 +1,655 @@
+package com.md2word.generator;
+
+import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.OrderedList;
+import com.vladsch.flexmark.ast.OrderedListItem;
+import com.vladsch.flexmark.ast.Paragraph;
+import com.vladsch.flexmark.ast.StrongEmphasis;
+import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.ast.BulletList;
+import com.vladsch.flexmark.ast.BulletListItem;
+import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.BlockQuote;
+import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ast.ThematicBreak;
+import com.vladsch.flexmark.ext.tables.TableBlock;
+import com.vladsch.flexmark.ext.tables.TableRow;
+import com.vladsch.flexmark.ext.tables.TableCell;
+import com.vladsch.flexmark.ext.tables.TableHead;
+import com.vladsch.flexmark.ext.tables.TableBody;
+import com.vladsch.flexmark.util.ast.Document;
+import com.vladsch.flexmark.util.ast.Node;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionURI;
+
+import java.io.IOException;
+import java.nio.file.Path;
+
+/**
+ * PDFGenerator uses Apache PDFBox to generate PDF documents from a Markdown AST.
+ *
+ * <p>This class traverses a flexmark Document AST and creates a PDF document with
+ * equivalent formatting and structure using Apache PDFBox.</p>
+ *
+ * <p>Currently supported elements:</p>
+ * <ul>
+ *   <li>Headings (levels 1-6) with proper font sizes</li>
+ *   <li>Paragraphs with text content</li>
+ *   <li>Text formatting (bold, italic) - TO BE IMPLEMENTED</li>
+ *   <li>Lists (ordered and unordered) - TO BE IMPLEMENTED</li>
+ *   <li>Code blocks - TO BE IMPLEMENTED</li>
+ *   <li>Blockquotes - TO BE IMPLEMENTED</li>
+ *   <li>Tables - TO BE IMPLEMENTED</li>
+ *   <li>Images - TO BE IMPLEMENTED</li>
+ *   <li>Horizontal rules - TO BE IMPLEMENTED</li>
+ * </ul>
+ *
+ * <p>This is a basic implementation that will be expanded in subsequent tasks to support
+ * all Markdown elements with proper formatting.</p>
+ */
+public class PDFGenerator {
+
+    private static final float MARGIN = 50;
+    private static final float DEFAULT_FONT_SIZE = 12;
+
+    /**
+     * Generates a PDF document from a Markdown AST.
+     *
+     * @param ast The flexmark Document AST to traverse and convert
+     * @param outputPath The path where the .pdf file will be created
+     * @throws IOException if the file cannot be written
+     * @throws IllegalArgumentException if outputPath is null
+     */
+    public void generate(Document ast, Path outputPath) throws IOException {
+        if (outputPath == null) {
+            throw new IllegalArgumentException("Output path cannot be null");
+        }
+
+        // Create a new PDF document
+        try (PDDocument document = new PDDocument()) {
+            // Add initial page
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+
+            // Create content stream for the page
+            try (PDPageContentStream content = new PDPageContentStream(
+                    document, page, PDPageContentStream.AppendMode.APPEND, true)) {
+
+                // Set starting position (top of page with margin)
+                float yPosition = PDRectangle.A4.getHeight() - MARGIN;
+
+                // Load standard fonts - all 4 Times font variants for text formatting support
+                PDFont regularFont = new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN);
+                PDFont boldFont = new PDType1Font(Standard14Fonts.FontName.TIMES_BOLD);
+                PDFont italicFont = new PDType1Font(Standard14Fonts.FontName.TIMES_ITALIC);
+                PDFont boldItalicFont = new PDType1Font(Standard14Fonts.FontName.TIMES_BOLD_ITALIC);
+
+                content.beginText();
+                content.setFont(regularFont, DEFAULT_FONT_SIZE);
+                content.newLineAtOffset(MARGIN, yPosition);
+
+                // Traverse the AST and convert each node
+                if (ast != null) {
+                    for (Node node : ast.getChildren()) {
+                        if (node instanceof Heading) {
+                            yPosition = processHeading((Heading) node, document, page, content, yPosition, regularFont, boldFont, italicFont, boldItalicFont);
+                        } else if (node instanceof Paragraph) {
+                            yPosition = processParagraph((Paragraph) node, document, page, content, yPosition, regularFont, boldFont, italicFont, boldItalicFont);
+                        } else if (node instanceof BulletList) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processBulletList((BulletList) node, document, content, yPosition);
+                        } else if (node instanceof OrderedList) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processOrderedList((OrderedList) node, document, content, yPosition);
+                        } else if (node instanceof FencedCodeBlock) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processCodeBlock((FencedCodeBlock) node, document, content, yPosition);
+                        } else if (node instanceof BlockQuote) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processBlockQuote((BlockQuote) node, document, content, yPosition);
+                        } else if (node instanceof TableBlock) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processTable((TableBlock) node, document, content, yPosition);
+                        } else if (node instanceof ThematicBreak) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processThematicBreak((ThematicBreak) node, document, content, yPosition);
+                        } else if (node instanceof Image) {
+                            // TO BE IMPLEMENTED in subsequent task
+                            yPosition = processImage((Image) node, document, content, yPosition);
+                        }
+                    }
+                }
+
+                content.endText();
+            }
+
+            // Save the document to the output file
+            document.save(outputPath.toFile());
+        }
+    }
+
+    /**
+     * Processes a Markdown heading node and adds it to the PDF document.
+     *
+     * @param heading The flexmark Heading node to process
+     * @param document The PDF document
+     * @param page The PDF page for adding annotations
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @param regularFont The regular font for text
+     * @param boldFont The bold font for text
+     * @param italicFont The italic font for text
+     * @param boldItalicFont The bold-italic font for text
+     * @return New Y position after writing heading
+     * @throws IOException if writing fails
+     */
+    private float processHeading(Heading heading, PDDocument document, PDPage page,
+                                  PDPageContentStream content, float yPosition,
+                                  PDFont regularFont, PDFont boldFont, PDFont italicFont, PDFont boldItalicFont) throws IOException {
+        int level = heading.getLevel();
+
+        // Validate heading level
+        if (level < 1 || level > 6) {
+            level = 1;
+        }
+
+        // Set font size based on heading level (h1=24pt, h2=20pt, h3=16pt, h4=14pt, h5=12pt, h6=10pt)
+        float fontSize = 24 - (level - 1) * 4;
+
+        // Process inline content with formatting (bold, italic, etc.)
+        // Note: Word wrapping not implemented - text may overflow if too long
+        yPosition = processInlineContent(heading, document, page, content, MARGIN, yPosition, fontSize,
+                                         regularFont, boldFont, italicFont, boldItalicFont, false, false);
+
+        // Add extra spacing after heading
+        yPosition -= 4;
+
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown paragraph node and adds it to the PDF document.
+     *
+     * @param paragraph The flexmark Paragraph node to process
+     * @param document The PDF document
+     * @param page The PDF page for adding annotations
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @param regularFont The regular font for text
+     * @param boldFont The bold font for text
+     * @param italicFont The italic font for text
+     * @param boldItalicFont The bold-italic font for text
+     * @return New Y position after writing paragraph
+     * @throws IOException if writing fails
+     */
+    private float processParagraph(Paragraph paragraph, PDDocument document, PDPage page,
+                                    PDPageContentStream content, float yPosition,
+                                    PDFont regularFont, PDFont boldFont, PDFont italicFont, PDFont boldItalicFont) throws IOException {
+        // Check if paragraph has any content
+        boolean hasChildren = false;
+        for (Node child : paragraph.getChildren()) {
+            hasChildren = true;
+            break;
+        }
+
+        if (!hasChildren) {
+            // Empty paragraph - just add spacing
+            yPosition -= DEFAULT_FONT_SIZE + 2;
+            return yPosition;
+        }
+
+        // Process inline content with formatting (bold, italic, etc.)
+        // Note: Word wrapping not implemented - text may overflow if too long
+        yPosition = processInlineContent(paragraph, document, page, content, MARGIN, yPosition, DEFAULT_FONT_SIZE,
+                                         regularFont, boldFont, italicFont, boldItalicFont, false, false);
+
+        // Add spacing after paragraph
+        yPosition -= 4;
+
+        return yPosition;
+    }
+
+    /**
+     * Processes inline content within a block node (heading or paragraph).
+     * Handles mixed content including plain text, emphasis (italic), strong (bold) formatting,
+     * inline code, and clickable hyperlinks.
+     *
+     * @param parent The parent node containing inline content
+     * @param document The PDF document
+     * @param page The PDF page for adding link annotations
+     * @param content The PDF content stream for writing
+     * @param xPosition Current X position on page (for tracking text width)
+     * @param yPosition Current Y position on page
+     * @param fontSize Font size to use for text
+     * @param regularFont The regular font
+     * @param boldFont The bold font
+     * @param italicFont The italic font
+     * @param boldItalicFont The bold-italic font
+     * @param inheritedBold Whether bold formatting is inherited from parent
+     * @param inheritedItalic Whether italic formatting is inherited from parent
+     * @return New Y position after writing content
+     * @throws IOException if writing fails
+     */
+    private float processInlineContent(Node parent, PDDocument document, PDPage page,
+                                       PDPageContentStream content, float xPosition, float yPosition, float fontSize,
+                                       PDFont regularFont, PDFont boldFont, PDFont italicFont, PDFont boldItalicFont,
+                                       boolean inheritedBold, boolean inheritedItalic) throws IOException {
+        for (Node child : parent.getChildren()) {
+            if (child instanceof Text) {
+                // Plain text node
+                Text textNode = (Text) child;
+                String text = textNode.getChars().toString();
+
+                if (!text.isEmpty()) {
+                    // Select font based on inherited formatting state
+                    PDFont currentFont = selectFont(inheritedBold, inheritedItalic,
+                                                     regularFont, boldFont, italicFont, boldItalicFont);
+
+                    content.setFont(currentFont, fontSize);
+                    content.showText(text);
+
+                    // Update X position by text width
+                    float textWidth = calculateTextWidth(text, currentFont, fontSize);
+                    xPosition += textWidth;
+                }
+            } else if (child instanceof Emphasis) {
+                // Italic text (*text* or _text_)
+                Emphasis emphasis = (Emphasis) child;
+
+                // Check if this Emphasis is within a StrongEmphasis (bold-italic case)
+                boolean parentIsStrong = (child.getParent() instanceof StrongEmphasis);
+
+                if (parentIsStrong) {
+                    // Bold-italic: both inheritedBold and italic should be true
+                    float[] positions = processInlineContentWithX(emphasis, document, page, content, xPosition, yPosition, fontSize,
+                                                                     regularFont, boldFont, italicFont, boldItalicFont, true, true);
+                    xPosition = positions[0];
+                    yPosition = positions[1];
+                } else {
+                    // Just italic
+                    float[] positions = processInlineContentWithX(emphasis, document, page, content, xPosition, yPosition, fontSize,
+                                                                     regularFont, boldFont, italicFont, boldItalicFont, inheritedBold, true);
+                    xPosition = positions[0];
+                    yPosition = positions[1];
+                }
+            } else if (child instanceof StrongEmphasis) {
+                // Bold text (**text** or __text__)
+                StrongEmphasis strong = (StrongEmphasis) child;
+                float[] positions = processInlineContentWithX(strong, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont, true, inheritedItalic);
+                xPosition = positions[0];
+                yPosition = positions[1];
+            } else if (child instanceof Code) {
+                // Inline code `code`
+                Code codeNode = (Code) child;
+                String codeText = codeNode.getChars().toString();
+
+                if (!codeText.isEmpty()) {
+                    // Use monospace font for inline code
+                    PDFont courierFont = new PDType1Font(Standard14Fonts.FontName.COURIER);
+                    content.setFont(courierFont, fontSize);
+                    content.showText(codeText);
+
+                    // Update X position
+                    float textWidth = calculateTextWidth(codeText, courierFont, fontSize);
+                    xPosition += textWidth;
+                }
+            } else if (child instanceof Link) {
+                // Hyperlink [text](url) - create clickable link
+                Link link = (Link) child;
+                String url = link.getUrl().toString();
+
+                // Extract link text content and calculate starting position
+                float linkStartX = xPosition;
+
+                // Set link color to blue
+                // Note: Link color not set due to PDFBox 3.0 beginText/endText limitations
+
+                // Process link content (which may contain formatting)
+                float[] positions = processInlineContentWithX(link, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont,
+                                                                 inheritedBold, inheritedItalic);
+                float linkEndX = positions[0];
+                yPosition = positions[1];
+                xPosition = linkEndX;
+
+                // Restore text color to black
+
+                // Create clickable link annotation
+                float linkWidth = linkEndX - linkStartX;
+                if (linkWidth > 0 && !url.isEmpty()) {
+                    // Link rectangle: (x, y-fontSize, width, fontSize*1.2)
+                    // Note: Y position is text baseline, so rectangle goes from baseline-fontSize to baseline
+                    PDRectangle linkBounds = new PDRectangle(linkStartX, yPosition - fontSize, linkWidth, fontSize * 1.2f);
+
+                    // Create link annotation
+                    PDAnnotationLink linkAnnotation = new PDAnnotationLink();
+                    linkAnnotation.setRectangle(linkBounds);
+
+                    // Set link action
+                    PDActionURI action = new PDActionURI(); action.setURI(url);
+                    linkAnnotation.setAction(action);
+
+                    // Add annotation to page
+                    page.getAnnotations().add(linkAnnotation);
+                }
+            } else if (child instanceof Image) {
+                // Image - skip inline images for now, will be handled by processImage
+                // Images are typically block-level, not inline
+            } else {
+                // Recurse for other node types
+                float[] positions = processInlineContentWithX(child, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont,
+                                                                 inheritedBold, inheritedItalic);
+                xPosition = positions[0];
+                yPosition = positions[1];
+            }
+        }
+
+        // Move to next line after processing all inline content
+        content.newLineAtOffset(0, -fontSize - 2);
+        yPosition -= fontSize + 2;
+
+        return yPosition;
+    }
+
+    /**
+     * Processes inline content and returns both X and Y positions.
+     * Helper method to track X position for link annotations.
+     *
+     * @param parent The parent node containing inline content
+     * @param document The PDF document
+     * @param page The PDF page for adding annotations
+     * @param content The PDF content stream
+     * @param xPosition Current X position
+     * @param yPosition Current Y position
+     * @param fontSize Font size
+     * @param regularFont The regular font
+     * @param boldFont The bold font
+     * @param italicFont The italic font
+     * @param boldItalicFont The bold-italic font
+     * @param inheritedBold Inherited bold state
+     * @param inheritedItalic Inherited italic state
+     * @return Array containing [newX, newY] positions
+     * @throws IOException if writing fails
+     */
+    private float[] processInlineContentWithX(Node parent, PDDocument document, PDPage page,
+                                              PDPageContentStream content, float xPosition, float yPosition, float fontSize,
+                                              PDFont regularFont, PDFont boldFont, PDFont italicFont, PDFont boldItalicFont,
+                                              boolean inheritedBold, boolean inheritedItalic) throws IOException {
+        for (Node child : parent.getChildren()) {
+            if (child instanceof Text) {
+                Text textNode = (Text) child;
+                String text = textNode.getChars().toString();
+
+                if (!text.isEmpty()) {
+                    PDFont currentFont = selectFont(inheritedBold, inheritedItalic,
+                                                     regularFont, boldFont, italicFont, boldItalicFont);
+                    content.setFont(currentFont, fontSize);
+                    content.showText(text);
+
+                    float textWidth = calculateTextWidth(text, currentFont, fontSize);
+                    xPosition += textWidth;
+                }
+            } else if (child instanceof Emphasis) {
+                Emphasis emphasis = (Emphasis) child;
+                boolean parentIsStrong = (child.getParent() instanceof StrongEmphasis);
+
+                if (parentIsStrong) {
+                    float[] positions = processInlineContentWithX(emphasis, document, page, content, xPosition, yPosition, fontSize,
+                                                                     regularFont, boldFont, italicFont, boldItalicFont, true, true);
+                    xPosition = positions[0];
+                    yPosition = positions[1];
+                } else {
+                    float[] positions = processInlineContentWithX(emphasis, document, page, content, xPosition, yPosition, fontSize,
+                                                                     regularFont, boldFont, italicFont, boldItalicFont, inheritedBold, true);
+                    xPosition = positions[0];
+                    yPosition = positions[1];
+                }
+            } else if (child instanceof StrongEmphasis) {
+                StrongEmphasis strong = (StrongEmphasis) child;
+                float[] positions = processInlineContentWithX(strong, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont, true, inheritedItalic);
+                xPosition = positions[0];
+                yPosition = positions[1];
+            } else if (child instanceof Code) {
+                Code codeNode = (Code) child;
+                String codeText = codeNode.getChars().toString();
+
+                if (!codeText.isEmpty()) {
+                    PDFont courierFont = new PDType1Font(Standard14Fonts.FontName.COURIER);
+                    content.setFont(courierFont, fontSize);
+                    content.showText(codeText);
+
+                    float textWidth = calculateTextWidth(codeText, courierFont, fontSize);
+                    xPosition += textWidth;
+                }
+            } else if (child instanceof Link) {
+                // Nested link within formatted text
+                Link link = (Link) child;
+                String url = link.getUrl().toString();
+                float linkStartX = xPosition;
+
+                content.setNonStrokingColor(0f, 0f, 1f);
+
+                float[] positions = processInlineContentWithX(link, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont,
+                                                                 inheritedBold, inheritedItalic);
+                float linkEndX = positions[0];
+                yPosition = positions[1];
+                xPosition = linkEndX;
+
+                content.setNonStrokingColor(0f, 0f, 0f);
+
+                float linkWidth = linkEndX - linkStartX;
+                if (linkWidth > 0 && !url.isEmpty()) {
+                    PDRectangle linkBounds = new PDRectangle(linkStartX, yPosition - fontSize, linkWidth, fontSize * 1.2f);
+                    PDAnnotationLink linkAnnotation = new PDAnnotationLink();
+                    linkAnnotation.setRectangle(linkBounds);
+                    PDActionURI action = PDActionURI.createURI(url);
+                    linkAnnotation.setAction(action);
+                    page.getAnnotations().add(linkAnnotation);
+                }
+            } else if (child instanceof Image) {
+                // Skip images
+            } else {
+                float[] positions = processInlineContentWithX(child, document, page, content, xPosition, yPosition, fontSize,
+                                                                 regularFont, boldFont, italicFont, boldItalicFont,
+                                                                 inheritedBold, inheritedItalic);
+                xPosition = positions[0];
+                yPosition = positions[1];
+            }
+        }
+
+        return new float[]{xPosition, yPosition};
+    }
+
+    /**
+     * Selects the appropriate font based on bold and italic flags.
+     *
+     * @param isBold Whether text should be bold
+     * @param isItalic Whether text should be italic
+     * @param regularFont The regular font
+     * @param boldFont The bold font
+     * @param italicFont The italic font
+     * @param boldItalicFont The bold-italic font
+     * @return The appropriate font for the given formatting
+     */
+    private PDFont selectFont(boolean isBold, boolean isItalic,
+                              PDFont regularFont, PDFont boldFont, PDFont italicFont, PDFont boldItalicFont) {
+        if (isBold && isItalic) {
+            return boldItalicFont;
+        } else if (isBold) {
+            return boldFont;
+        } else if (isItalic) {
+            return italicFont;
+        } else {
+            return regularFont;
+        }
+    }
+
+    /**
+     * Calculates the width of text in PDF points.
+     *
+     * @param text The text to measure
+     * @param font The font to use for measurement
+     * @param fontSize The font size
+     * @return The width of the text in PDF points
+     * @throws IOException if font measurement fails
+     */
+    private float calculateTextWidth(String text, PDFont font, float fontSize) throws IOException {
+        return font.getStringWidth(text) * fontSize / 1000f;
+    }
+
+    /**
+     * Processes a Markdown bullet list node - placeholder for future implementation.
+     *
+     * @param bulletList The flexmark BulletList node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing list
+     * @throws IOException if writing fails
+     */
+    private float processBulletList(BulletList bulletList, PDDocument document,
+                                    PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip bullet lists for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown ordered list node - placeholder for future implementation.
+     *
+     * @param orderedList The flexmark OrderedList node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing list
+     * @throws IOException if writing fails
+     */
+    private float processOrderedList(OrderedList orderedList, PDDocument document,
+                                     PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip ordered lists for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown code block node - placeholder for future implementation.
+     *
+     * @param codeBlock The flexmark FencedCodeBlock node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing code block
+     * @throws IOException if writing fails
+     */
+    private float processCodeBlock(FencedCodeBlock codeBlock, PDDocument document,
+                                    PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip code blocks for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown blockquote node - placeholder for future implementation.
+     *
+     * @param blockQuote The flexmark BlockQuote node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing blockquote
+     * @throws IOException if writing fails
+     */
+    private float processBlockQuote(BlockQuote blockQuote, PDDocument document,
+                                     PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip blockquotes for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown table node - placeholder for future implementation.
+     *
+     * @param table The flexmark TableBlock node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing table
+     * @throws IOException if writing fails
+     */
+    private float processTable(TableBlock table, PDDocument document,
+                               PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip tables for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown horizontal rule node - placeholder for future implementation.
+     *
+     * @param thematicBreak The flexmark ThematicBreak node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing horizontal rule
+     * @throws IOException if writing fails
+     */
+    private float processThematicBreak(ThematicBreak thematicBreak, PDDocument document,
+                                       PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip horizontal rules for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Processes a Markdown image node - placeholder for future implementation.
+     *
+     * @param image The flexmark Image node to process
+     * @param document The PDF document
+     * @param content The content stream for writing
+     * @param yPosition Current Y position on page
+     * @return New Y position after processing image
+     * @throws IOException if writing fails
+     */
+    private float processImage(Image image, PDDocument document,
+                               PDPageContentStream content, float yPosition) throws IOException {
+        // Placeholder: skip images for now
+        // Will be implemented in subsequent task
+        return yPosition;
+    }
+
+    /**
+     * Extracts text content from a node and its children recursively.
+     * Used for basic text extraction without formatting.
+     *
+     * @param node The node to extract text from
+     * @return The concatenated text content
+     */
+    private String extractText(Node node) {
+        StringBuilder text = new StringBuilder();
+
+        // If it's a Text node, append its content
+        if (node instanceof Text) {
+            text.append(((Text) node).getChars());
+        } else {
+            // Otherwise, recursively get text from children
+            for (Node child : node.getChildren()) {
+                text.append(extractText(child));
+            }
+        }
+
+        return text.toString();
+    }
+}
